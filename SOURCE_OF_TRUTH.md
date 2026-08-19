@@ -14,11 +14,12 @@
 
 ## 1. ארכיטקטורה — ריפו יחיד
 
-- הריפו הקנוני של הפרויקט הוא `yanivmizrachiy/ratio-workbook`.
-- לאחר השלמת ההגירה, **אסור** שקוד פעיל של חוברת היחס יישאר תלוי ב־`razpages`, ב־`sources/lovable/ratio-workbook` או בריפו אחר.
-- `razpages/sources/lovable/ratio-workbook` הוא מקור הגירה זמני בלבד. סוגרים/מפסיקים להשתמש בו רק אחרי שכל קבצי המקור הנדרשים וכל 55 דפי התלמיד עברו לריפו זה ונבדקו.
+- הריפו הקנוני היחיד של הפרויקט הוא `yanivmizrachiy/ratio-workbook`.
+- **אסור** שקוד פעיל של חוברת היחס יהיה תלוי ב־`razpages`, ב־`sources/lovable/ratio-workbook` או בריפו אחר.
+- המקור הישן ב־`razpages/sources/lovable/ratio-workbook` הוצא משימוש פעיל ב־2026-08-19 ונשאר היסטוריה/rollback בלבד. אסור לערוך, לבנות, לבדוק או לפרסם ממנו.
+- כל מסלולי ה־import/render/audit/CI הישנים של Ratio ב־`razpages` הוסרו, ו־PRי Ratio הישנים נסגרו כדי למנוע החזרה מקרית של הארכיטקטורה הישנה.
 - אין שני מקורות אמת ואין העתקה ידנית קבועה בין ריפוזיטוריז.
-- `main` הוא Production מוגן. בזמן ההגירה עובדים בענף מבודד ולא משנים את הקישור שכבר נשלח למורים.
+- `main` של `ratio-workbook` הוא Production מוגן. בזמן Preview ופיתוח עובדים בענף מבודד ולא משנים את `index.html` שכבר נשלח למורים.
 
 ## 2. מבנה יעד פשוט לעריכה
 
@@ -31,11 +32,10 @@
 ├─ src/                      # קוד המוצר
 │  ├─ data/worksheetPages.tsx
 │  ├─ components/worksheet/
-│  ├─ styles/
 │  └─ ...
 ├─ scripts/                  # build, manifest, verification
-├─ tests/                    # בדיקות מבנה/מתמטיקה/regression
-├─ public/                   # רק נכסים שבאמת נדרשים
+├─ vendor/fonts/             # פונטים מקומיים
+├─ workbench.html            # סביבת עריכה/Preview מהירה
 ├─ preview/                  # generated; לא מקור אמת
 └─ .github/workflows/        # CI/Preview/Release
 ```
@@ -150,30 +150,36 @@
 - שינוי דרישה: `SOURCE_OF_TRUTH.md` קודם → קוד → tests → Preview.
 - שינוי קוד שאינו דורש שינוי דרישה: קוד → tests → Preview; אין לשכפל כלל למסמך אחר.
 - CI בודק שה־README מצביע למסמך הזה ואינו מכיל ספר כללים חלופי.
-- CI בודק שאין import/path פעיל ל־`sources/lovable/ratio-workbook` או ל־`razpages` לאחר סיום ההגירה.
+- CI בודק שאין import/path פעיל ל־`sources/lovable/ratio-workbook` או ל־`razpages`.
 - artifact נוצר רק מה־commit שנבדק; אין העתקה ידנית של HTML ממקור אחר.
 
-## 12. תנאי סגירת המקור הישן
+## 12. תנאי סגירת המקור הישן — מצב נוכחי
 
-אסור לסגור/למחוק/לארכב את המקור הישן לפני שכל התנאים הבאים ירוקים:
+התנאים הטכניים לסגירת המקור הפעיל הושלמו:
 
-- [ ] כל 55 דפי התלמיד קיימים בריפו החדש.
-- [ ] כל הרכיבים המשותפים עברו.
-- [ ] כל CSS/פונטים/נכסים שנדרשים בפועל עברו.
-- [ ] scripts של build/manifest/verify עברו והם עצמאיים.
-- [ ] כל tests עברו והותאמו למזהים יציבים.
-- [ ] Preview מלא נבנה מהריפו החדש בלבד.
-- [ ] Chromium audit עבר על כל העמודים.
-- [ ] PDF + screenshots נוצרו.
-- [ ] אין reference פעיל ל־`razpages`/`sources` בקוד או ב־CI.
-- [ ] יניב ראה את ה־Preview ואישר את מבנה הפרויקט.
+- [x] כל 55 דפי התלמיד קיימים בריפו החדש.
+- [x] כל הרכיבים המשותפים הנדרשים עברו.
+- [x] כל CSS/פונטים/נכסים שנדרשים בפועל עברו.
+- [x] scripts של build/manifest/verify עברו והם עצמאיים.
+- [x] כל tests עברו והותאמו למזהים יציבים.
+- [x] Preview מלא נבנה מהריפו החדש בלבד.
+- [x] Chromium audit עבר על כל העמודים.
+- [x] PDF + screenshots נוצרו.
+- [x] אין reference פעיל ל־`razpages`/`sources` בקוד או ב־CI של הפרויקט החדש.
+- [ ] יניב ראה את ה־Preview ואישר לפרסם ל־Production.
 
-רק לאחר שכל הסעיפים מסומנים ניתן להפסיק להשתמש ב־`sources/lovable/ratio-workbook`.
+בהתאם לדרישה המאוחרת והמפורשת של יניב להפסיק להשתמש ב־`sources` לאחר שכל הדפים עברו, המקור הישן כבר **הוצא משימוש פעיל** ונשמר כארכיון rollback בלבד. אין למחוק את היסטוריית ה־rollback הפיזית לפני אישור ה־Preview, ואין להשתמש בה לפיתוח.
 
-## 13. סטטוס הגירה — 2026-08-19
+## 13. סטטוס — 2026-08-19
 
-- Production הנוכחי ב־`main` נשאר ללא שינוי.
-- ענף ההגירה: `agent/single-source-migration-20260819`.
-- מקור ההגירה הזמני: `yanivmizrachiy/razpages`, branch `agent/ratio-preview-hardening-20260819`, path `sources/lovable/ratio-workbook/`.
-- יעד: להעביר רק את מה שנדרש לחוברת היחס; לא להעתיק פסולת/קבצים היסטוריים לא־פעילים.
-- לאחר ההעברה README יישאר מצביע קצר בלבד למסמך זה.
+- **הגירת המקור הטכנית הושלמה.**
+- ריפו פעיל יחיד: `yanivmizrachiy/ratio-workbook`.
+- ענף Preview/פיתוח מאומת: `agent/single-source-migration-20260819`.
+- commit המקור העצמאי: `8126b4c7890fcce9f80b8777526c3cc962008093`.
+- CI קבוע של הריפו החדש עבר מתוך `ratio-workbook` עצמו.
+- תוצאת האימות: 23/23 tests, 55 דפי תלמיד סמנטיים, 70 דפי A4 פיזיים, 0 דפי מורה, עמוד ראשון 1, 0 overflow, 0 שגיאות דפדפן ו־0 בקשות רשת חיצוניות.
+- hash של ה־Preview המאומת: `eac43c005682e986dcc6dd9ba2c1c5c55de0d08379b61bc87b515cfad661846d`.
+- `razpages` PR #156 מוזג ל־main והסיר את מסלול הפיתוח/CI הפעיל הישן של Ratio; המקור הישן הוא ארכיון היסטורי בלבד.
+- PRי Ratio הישנים ב־`razpages` (#155, #139, #138, #137) נסגרו ואינם מסלול עבודה.
+- Production הציבורי ב־`ratio-workbook/main/index.html` **לא השתנה**.
+- השלב הבא היחיד לפני פרסום: יניב בודק את ה־Preview ומאשר במפורש. עד אז אין merge/release שמשנה את הקישור הציבורי.
