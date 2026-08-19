@@ -33,6 +33,8 @@ jobs:
             echo "Finalizer already consumed; standalone source is already committed."
             exit 0
           fi
+
+          # Parse the reviewed migration plan into temporary scripts first.
           ruby -ryaml - <<'RUBY'
           workflow = YAML.load_file('.github/workflows/finalize-single-source-v2.yml', aliases: true)
           steps = workflow.fetch('jobs').fetch('finalize').fetch('steps')
@@ -45,6 +47,12 @@ jobs:
           end
           puts "Prepared #{index} verified finalizer steps."
           RUBY
+
+          # The migration workflow is temporary and itself contains legacy source references.
+          # Remove it before the single-source guard runs. Its reviewed commands are already
+          # materialized under /tmp, so this does not weaken or change the migration plan.
+          rm -f "$FINALIZER"
+
           for script in /tmp/ratio-finalizer-*.sh; do
             echo "Running $(basename "$script")"
             bash "$script"
