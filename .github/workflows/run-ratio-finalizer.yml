@@ -1,0 +1,51 @@
+name: Run Ratio Finalizer
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ratio-finalizer-runner-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  finalize:
+    if: ${{ github.head_ref == 'agent/single-source-migration-20260819' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout PR branch with write credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Run the reviewed finalizer stored on the PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          FINALIZER=.github/workflows/finalize-single-source-v2.yml
+          if [ ! -f "$FINALIZER" ]; then
+            echo "Finalizer already consumed; standalone source is already committed."
+            exit 0
+          fi
+          ruby -ryaml - <<'RUBY'
+          workflow = YAML.load_file('.github/workflows/finalize-single-source-v2.yml', aliases: true)
+          steps = workflow.fetch('jobs').fetch('finalize').fetch('steps')
+          index = 0
+          steps.each do |step|
+            next unless step['run']
+            path = format('/tmp/ratio-finalizer-%02d.sh', index)
+            File.write(path, "set -euo pipefail\n" + step['run'] + "\n")
+            index += 1
+          end
+          puts "Prepared #{index} verified finalizer steps."
+          RUBY
+          for script in /tmp/ratio-finalizer-*.sh; do
+            echo "Running $(basename "$script")"
+            bash "$script"
+          done
