@@ -1,0 +1,45 @@
+name: Ratio Single Source Verify
+
+on:
+  push:
+    branches:
+      - agent/single-source-migration-20260819
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ratio-single-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run verify
+      - name: Upload complete preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ratio-single-source-preview-${{ github.run_number }}
+          path: |
+            preview/full-workbook.html
+            preview/full-workbook-artifact.html
+            preview/audit/audit.json
+            preview/audit/ratio-workbook-preview.pdf
+            preview/audit/pages/*.png
+            content-manifest.json
+          if-no-files-found: error
+          retention-days: 30
