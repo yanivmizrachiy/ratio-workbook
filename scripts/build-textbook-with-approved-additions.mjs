@@ -57,12 +57,6 @@ replaceOnce(
   'paginator source selector',
 );
 
-replaceOnce(
-  "  sourceWorkbookSha256,\n  taskSequenceSha256,",
-  "  sourceWorkbookSha256,\n  approvedAdditionsSha256,\n  taskSequenceSha256,",
-  'build summary',
-);
-
 fs.writeFileSync(generatedScript, source, 'utf8');
 try {
   await import(`${pathToFileURL(generatedScript).href}?v=${Date.now()}`);
