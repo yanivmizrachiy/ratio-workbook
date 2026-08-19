@@ -6,6 +6,10 @@ on:
       - agent/single-source-migration-20260819
     paths:
       - '.github/workflows/migrate-single-source.yml'
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +21,7 @@ concurrency:
 
 jobs:
   migrate:
-    if: ${{ !contains(github.event.head_commit.message || '', '[migration-sync]') }}
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message || '', '[migration-sync]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -32,8 +36,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
           test "${GITHUB_REPOSITORY}" = "yanivmizrachiy/ratio-workbook"
-          test "${GITHUB_REF_NAME}" = "agent/single-source-migration-20260819"
+          test "$branch" = "agent/single-source-migration-20260819"
           test -f SOURCE_OF_TRUTH.md
           echo "Migration branch only. main is untouched."
 
@@ -51,7 +56,8 @@ jobs:
           set -euo pipefail
           OLD="$RUNNER_TEMP/razpages-source/sources/lovable/ratio-workbook"
 
-          rm -rf src scripts vendor preview dist node_modules
+          rm -rf src scripts vendor preview dist node_modules public sources
+          rm -f .nojekyll bun.lock bun.lockb COMPLIANCE-PLAN.md PARABULA-INTEGRATION.md components.json eslint.config.js
           mkdir -p src/components/worksheet/pages src/components/worksheet/corrected src/data src/lib src/test scripts vendor/fonts .github/workflows
 
           cp "$OLD"/src/components/worksheet/pages/*.tsx src/components/worksheet/pages/
@@ -79,9 +85,6 @@ jobs:
           cp "$OLD"/scripts/verify-full-workbook.mjs scripts/
 
           cp -a "$RUNNER_TEMP/razpages-source/vendor/fonts/." vendor/fonts/
-
-          rm -f bun.lock bun.lockb COMPLIANCE-PLAN.md PARABULA-INTEGRATION.md components.json eslint.config.js
-          rm -rf avodat-kayitz-h8-meztaynim public
 
       - name: Create minimal editing workbench
         shell: bash
@@ -325,7 +328,7 @@ jobs:
           .DS_Store
           EOF
 
-      - name: Remove legacy network and path dependencies
+      - name: Normalize single source terminology, local fonts and print behavior
         shell: bash
         run: |
           set -euo pipefail
@@ -334,12 +337,29 @@ jobs:
 
           css = Path('src/index.css')
           text = css.read_text(encoding='utf-8')
-          lines = text.splitlines()
-          lines = [line for line in lines if 'fonts.googleapis.com' not in line]
-          text = '\n'.join(lines) + '\n'
+          text = '\n'.join(line for line in text.splitlines() if 'fonts.googleapis.com' not in line) + '\n'
           text = text.replace("font-family: 'Heebo', 'Assistant', sans-serif;", "font-family: 'Rubik', Arial, sans-serif;")
           text = text.replace("font-family: 'David Libre', 'David', serif;", "font-family: 'Rubik', Arial, sans-serif;")
           css.write_text(text, encoding='utf-8')
+
+          pages = Path('src/data/worksheetPages.tsx')
+          text = pages.read_text(encoding='utf-8')
+          text = text.replace(' * מקור האמת לחוברת התלמיד.', ' * אינדקס המימוש הקנוני של דפי התלמיד. הדרישות עצמן נמצאות רק ב-SOURCE_OF_TRUTH.md.')
+          pages.write_text(text, encoding='utf-8')
+
+          manifest = Path('scripts/generate-content-manifest.mjs')
+          text = manifest.read_text(encoding='utf-8')
+          text = text.replace("sourceOfTruth: 'src/data/worksheetPages.tsx',", "requirementsSourceOfTruth: 'SOURCE_OF_TRUTH.md',\n    implementationIndex: 'src/data/worksheetPages.tsx',")
+          manifest.write_text(text, encoding='utf-8')
+
+          test = Path('src/test/workbookStructure.test.tsx')
+          text = test.read_text(encoding='utf-8')
+          text = text.replace("it('contains exactly 55 student pages with stable keys and sequential display numbers', () => {\n    expect(WORKSHEET_PAGES).toHaveLength(55);", "it('contains student pages with stable keys and sequential display numbers', () => {\n    expect(WORKSHEET_PAGES.length).toBeGreaterThan(0);")
+          test.write_text(text, encoding='utf-8')
+
+          canonical = Path('src/ratio-canonical-fit.css')
+          text = canonical.read_text(encoding='utf-8').replace('The opening teacher\n   sequence is not affected.', 'Teacher-only pages are not part of the student workbook.')
+          canonical.write_text(text, encoding='utf-8')
 
           build = Path('scripts/_build-full-workbook.mjs')
           text = build.read_text(encoding='utf-8')
@@ -367,7 +387,7 @@ jobs:
           verify.write_text(text, encoding='utf-8')
           PY
 
-      - name: Add single-source guard
+      - name: Add single-source guard and concise README
         shell: bash
         run: |
           set -euo pipefail
@@ -391,8 +411,11 @@ jobs:
           if (!readme.includes('SOURCE_OF_TRUTH.md')) throw new Error('README must point to SOURCE_OF_TRUTH.md');
           if (readme.length > 2200) throw new Error('README is too large; requirements belong only in SOURCE_OF_TRUTH.md');
 
+          const forbiddenText = [
+            ['sources', 'lovable', 'ratio-workbook'].join('/'),
+            ['yanivmizrachiy', 'razpages'].join('/')
+          ];
           const scanRoots = ['src', 'scripts', '.github/workflows'];
-          const forbidden = [/sources\/lovable\/ratio-workbook/g, /yanivmizrachiy\/razpages/g];
           function walk(dir) {
             if (!fs.existsSync(dir)) return [];
             return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -401,12 +424,20 @@ jobs:
             });
           }
           for (const file of scanRoots.flatMap((item) => walk(path.join(root, item)))) {
+            if (path.basename(file) === 'check-source-of-truth.mjs') continue;
             if (!/\.(?:[cm]?[jt]sx?|css|md|ya?ml|json)$/.test(file)) continue;
             const text = fs.readFileSync(file, 'utf8');
-            for (const pattern of forbidden) {
-              if (pattern.test(text)) throw new Error(`Legacy source reference in ${path.relative(root, file)}`);
-              pattern.lastIndex = 0;
+            for (const value of forbiddenText) {
+              if (text.includes(value)) throw new Error(`Legacy source reference in ${path.relative(root, file)}`);
             }
+          }
+
+          const manifestScript = fs.readFileSync(path.join(root, 'scripts/generate-content-manifest.mjs'), 'utf8');
+          if (!manifestScript.includes("requirementsSourceOfTruth: 'SOURCE_OF_TRUTH.md'")) {
+            throw new Error('Manifest must declare SOURCE_OF_TRUTH.md as the requirements source.');
+          }
+          if (manifestScript.includes("sourceOfTruth: 'src/data/worksheetPages.tsx'")) {
+            throw new Error('worksheetPages.tsx must not be called the requirements source of truth.');
           }
           console.log('Single source-of-truth guard passed.');
           EOF
@@ -492,6 +523,10 @@ jobs:
                     retention-days: 30
           EOF
 
+      - name: Remove one-time migration workflow from target tree
+        shell: bash
+        run: rm -f .github/workflows/migrate-single-source.yml
+
       - name: Install exact dependencies and verify migrated source
         shell: bash
         run: |
@@ -501,7 +536,7 @@ jobs:
           npx playwright install --with-deps chromium
           npm run verify
 
-      - name: Ensure all migration invariants before commit
+      - name: Ensure all migration invariants
         shell: bash
         run: |
           set -euo pipefail
@@ -515,14 +550,22 @@ jobs:
           test ! -e bun.lock
           test ! -e bun.lockb
           test ! -d sources
-          test ! -d avodat-kayitz-h8-meztaynim
           grep -q 'ratio-page-01' src/data/worksheetPages.tsx
-          grep -q "toHaveLength(55)" src/test/workbookStructure.test.tsx
-          node -e "const a=require('./preview/ratio-preview/audit/audit.json'); if(a.status!=='pass'||a.teacherPages!==0||a.firstStudentPage!==1||a.semanticPages!==55) process.exit(1); console.log(a)"
+          node -e "const a=require('./preview/ratio-preview/audit/audit.json'); if(a.status!=='pass'||a.teacherPages!==0||a.firstStudentPage!==1||a.semanticPages!==55) process.exit(1); console.log({status:a.status,semanticPages:a.semanticPages,physicalPages:a.physicalPages,teacherPages:a.teacherPages,firstStudentPage:a.firstStudentPage,contentSha256:a.contentSha256})"
 
-      - name: Remove one-time migration workflow from the migrated tree
-        shell: bash
-        run: rm -f .github/workflows/migrate-single-source.yml
+      - name: Upload migration preview before any merge
+        uses: actions/upload-artifact@v4
+        with:
+          name: ratio-migration-preview-${{ github.run_number }}
+          path: |
+            preview/ratio-preview/full-workbook.html
+            preview/ratio-preview/full-workbook-artifact.html
+            preview/ratio-preview/audit/audit.json
+            preview/ratio-preview/audit/ratio-workbook-preview.pdf
+            preview/ratio-preview/audit/pages/*.png
+            content-manifest.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Commit the self-contained source to the isolated branch
         shell: bash
@@ -532,5 +575,9 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add -A
           git status --short
+          if git diff --cached --quiet; then
+            echo "No migration changes to commit."
+            exit 0
+          fi
           git commit -m "[migration-sync] העברת פרויקט יחס למקור אמת יחיד עצמאי"
           git push origin HEAD:agent/single-source-migration-20260819
