@@ -62,17 +62,17 @@ function IntroActivity() {
     <PageLayout pageNumber={901} chapter={CHAPTER} topic={TOPIC}>
       <div style={{ ...text, display: 'grid', gap: 20 }}>
         <ActivityTitle>פרופורציה=שוויון בין יחסים</ActivityTitle>
-        <p>שכבת ח׳ האלופה יצאה לטיול שנתי.</p>
-        <p>בכיתה ח׳1 על כל 10 תלמידים יש מורה מבוגר מלווה.</p>
-        <div style={row}>השלימו: בכיתה ח׳1 יצאו פי 10 <Choice options={['תלמידים', 'מורים']} /> מאשר <Choice options={['תלמידים', 'מורים']} /></div>
+        <p>שכבת ח' האלופה יצאה לטיול שנתי.</p>
+        <p>בכיתה ח'1 על כל 10 תלמידים יש מורה מבוגר מלווה.</p>
+        <div style={row}>השלימו: בכיתה ח'1 יצאו פי 10 <Choice options={['תלמידים', 'מורים']} /> מאשר <Choice options={['תלמידים', 'מורים']} /></div>
         <div style={row}>היחס בין המורים לתלמידים הוא: <FractionBoxes /> <span>(אפשר לכתוב גם:</span><RatioBoxes /><span>)</span></div>
         <div style={{ height: 12 }} />
-        <p>בכיתה ח׳2 יצאו לטיול 30 תלמידים ו - 3 מבוגרים</p>
-        <div style={row}>היחס בין המבוגרים לתלמידים בכיתה ח׳2 הוא: <FractionBoxes num={3} /></div>
+        <p>בכיתה ח'2 יצאו לטיול 30 תלמידים ו - 3 מבוגרים</p>
+        <div style={row}>היחס בין המבוגרים לתלמידים בכיתה ח'2 הוא: <FractionBoxes num={3} /></div>
         <Arrow />
         <div style={{ ...row, justifyContent: 'center' }}><FractionBoxes /><strong style={{ color: ACCENT }}>יחס מצומצם</strong></div>
         <div style={{ height: 6 }} />
-        <div style={row}><strong style={{ color: ACCENT }}>מסקנה:</strong> גם בכיתה ח׳1 וגם בכיתה ח׳2 היחס בין המבוגרים לילדים הוא 1 ל - <Box /></div>
+        <div style={row}><strong style={{ color: ACCENT }}>מסקנה:</strong> גם בכיתה ח'1 וגם בכיתה ח'2 היחס בין המבוגרים לילדים הוא 1 ל - <Box /></div>
         <div style={row}>היחס בין המבוגרים לילדים בשתי הכיתות הוא: <Choice /></div>
         <p>לכן יש פרופורציה בין היחסים.</p>
       </div>
@@ -119,8 +119,8 @@ function Question4() {
     <PageLayout pageNumber={904} chapter={CHAPTER} topic={TOPIC}>
       <div style={{ ...text, display: 'grid', gap: 24 }}>
         <QuestionTitle n={4} />
-        <p><strong>מכונית עוברת 120 ק״מ במשך 2 שעות</strong></p>
-        <p><strong>רכבת עוברת 240 ק״מ במשך 3 שעות</strong></p>
+        <p><strong>מכונית עוברת 120 ק"מ במשך 2 שעות</strong></p>
+        <p><strong>רכבת עוברת 240 ק"מ במשך 3 שעות</strong></p>
         <p><strong>מה היחס בין המרחק של הנסיעה לבין זמן הנסיעה?</strong></p>
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', textAlign: 'center' }}>
           <div><div style={{ fontWeight: 600, marginBottom: 8 }}>רכבת</div><Arrow /><span><FractionBoxes /> = <FractionBoxes /></span></div>
