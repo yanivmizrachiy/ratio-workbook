@@ -1,0 +1,6 @@
+node_modules/
+dist/
+preview/
+content-manifest.json
+*.log
+.DS_Store
