@@ -1,0 +1,536 @@
+name: One-time Ratio Single Source Migration
+
+on:
+  push:
+    branches:
+      - agent/single-source-migration-20260819
+    paths:
+      - '.github/workflows/migrate-single-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ratio-single-source-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: ${{ !contains(github.event.head_commit.message || '', '[migration-sync]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout isolated target branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/single-source-migration-20260819
+          fetch-depth: 0
+
+      - name: Guard production
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REPOSITORY}" = "yanivmizrachiy/ratio-workbook"
+          test "${GITHUB_REF_NAME}" = "agent/single-source-migration-20260819"
+          test -f SOURCE_OF_TRUTH.md
+          echo "Migration branch only. main is untouched."
+
+      - name: Fetch the reviewed migration source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch agent/ratio-preview-hardening-20260819 \
+            https://github.com/yanivmizrachiy/razpages.git "$RUNNER_TEMP/razpages-source"
+          test -d "$RUNNER_TEMP/razpages-source/sources/lovable/ratio-workbook"
+
+      - name: Build clean root-level source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          OLD="$RUNNER_TEMP/razpages-source/sources/lovable/ratio-workbook"
+
+          rm -rf src scripts vendor preview dist node_modules
+          mkdir -p src/components/worksheet/pages src/components/worksheet/corrected src/data src/lib src/test scripts vendor/fonts .github/workflows
+
+          cp "$OLD"/src/components/worksheet/pages/*.tsx src/components/worksheet/pages/
+          cp "$OLD"/src/components/worksheet/corrected/*.tsx src/components/worksheet/corrected/
+          rm -f src/components/worksheet/corrected/TeacherIntroPages.tsx
+
+          cp "$OLD"/src/data/worksheetPages.tsx src/data/
+          cp "$OLD"/src/lib/utils.ts src/lib/
+          cp "$OLD"/src/lib/ratioMath.ts src/lib/
+          cp "$OLD"/src/test/pageClass.test.tsx src/test/
+          cp "$OLD"/src/test/printHeader.test.tsx src/test/
+          cp "$OLD"/src/test/ratioMath.test.ts src/test/
+          cp "$OLD"/src/test/workbookStructure.test.tsx src/test/
+          cp "$OLD"/src/test/setup.ts src/test/
+          cp "$OLD"/src/vite-env.d.ts src/
+
+          cp "$OLD"/src/index.css src/
+          cp "$OLD"/src/curriculum-pages.css src/
+          cp "$OLD"/src/ratio-v2.css src/
+          cp "$OLD"/src/ratio-layout-fixes.css src/
+          cp "$OLD"/src/ratio-canonical-fit.css src/
+
+          cp "$OLD"/scripts/_build-full-workbook.mjs scripts/
+          cp "$OLD"/scripts/generate-content-manifest.mjs scripts/
+          cp "$OLD"/scripts/verify-full-workbook.mjs scripts/
+
+          cp -a "$RUNNER_TEMP/razpages-source/vendor/fonts/." vendor/fonts/
+
+          rm -f bun.lock bun.lockb COMPLIANCE-PLAN.md PARABULA-INTEGRATION.md components.json eslint.config.js
+          rm -rf avodat-kayitz-h8-meztaynim public
+
+      - name: Create minimal editing workbench
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > src/App.tsx <<'EOF'
+          import { useMemo, useState } from 'react';
+          import { WORKSHEET_PAGES } from '@/data/worksheetPages';
+          import { PageNumberScope } from '@/components/worksheet/pages/PageLayout';
+
+          const ZOOMS = [50, 67, 75, 90, 100, 110, 125] as const;
+
+          export default function App() {
+            const [index, setIndex] = useState(0);
+            const [zoom, setZoom] = useState<number>(90);
+            const page = WORKSHEET_PAGES[index];
+            const pageOptions = useMemo(() => WORKSHEET_PAGES.map((item, i) => ({ ...item, index: i })), []);
+
+            return (
+              <div className="ratio-editor-shell" dir="rtl">
+                <aside className="ratio-editor-sidebar no-print" aria-label="ניווט בחוברת">
+                  <div className="ratio-editor-title">
+                    <strong>יחס ופרופורציה</strong>
+                    <span>{WORKSHEET_PAGES.length} דפי תלמיד</span>
+                  </div>
+                  <div className="ratio-editor-actions">
+                    <button type="button" onClick={() => window.print()}>הדפסה</button>
+                    <label>
+                      תצוגה
+                      <select value={zoom} onChange={(event) => setZoom(Number(event.target.value))}>
+                        {ZOOMS.map((value) => <option key={value} value={value}>{value}%</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  <nav className="ratio-editor-pages">
+                    {pageOptions.map((item) => (
+                      <button
+                        type="button"
+                        key={item.key}
+                        className={item.index === index ? 'is-active' : ''}
+                        onClick={() => setIndex(item.index)}
+                      >
+                        <b>{item.id}</b>
+                        <span>{item.title}</span>
+                      </button>
+                    ))}
+                  </nav>
+                </aside>
+
+                <main className="ratio-editor-preview">
+                  <div className="ratio-editor-toolbar no-print">
+                    <button type="button" disabled={index === 0} onClick={() => setIndex((value) => Math.max(0, value - 1))}>הקודם</button>
+                    <span>עמוד {page.id} מתוך {WORKSHEET_PAGES.length}</span>
+                    <button type="button" disabled={index === WORKSHEET_PAGES.length - 1} onClick={() => setIndex((value) => Math.min(WORKSHEET_PAGES.length - 1, value + 1))}>הבא</button>
+                  </div>
+                  <div className="ratio-editor-canvas">
+                    <div className="ratio-editor-page-scale" style={{ zoom: zoom / 100 }}>
+                      <PageNumberScope pageNumber={page.id}>{page.component()}</PageNumberScope>
+                    </div>
+                  </div>
+                </main>
+
+                <div className="ratio-print-all print-only" aria-hidden="true">
+                  {WORKSHEET_PAGES.map((item) => (
+                    <PageNumberScope key={item.key} pageNumber={item.id}>{item.component()}</PageNumberScope>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          EOF
+
+          cat > src/main.tsx <<'EOF'
+          import { createRoot } from 'react-dom/client';
+          import App from './App';
+          import './index.css';
+          import './curriculum-pages.css';
+          import './ratio-v2.css';
+          import './ratio-layout-fixes.css';
+          import './ratio-canonical-fit.css';
+          import './workbench.css';
+
+          createRoot(document.getElementById('root')!).render(<App />);
+          EOF
+
+          cat > src/workbench.css <<'EOF'
+          .ratio-editor-shell{min-height:100vh;background:#eef2f7;display:grid;grid-template-columns:minmax(0,1fr) 310px;direction:ltr}
+          .ratio-editor-sidebar{grid-column:2;direction:rtl;background:#fff;border-right:1px solid #dbe3ee;height:100vh;position:sticky;top:0;display:flex;flex-direction:column;overflow:hidden}
+          .ratio-editor-title{padding:16px 18px;border-bottom:1px solid #e5eaf1;display:flex;flex-direction:column;gap:3px;color:#1f2a44}.ratio-editor-title strong{font-size:18px}.ratio-editor-title span{font-size:12px;color:#64748b}
+          .ratio-editor-actions{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #e5eaf1}.ratio-editor-actions button,.ratio-editor-actions select,.ratio-editor-toolbar button{font:inherit;border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:7px 10px;color:#1f2a44}.ratio-editor-actions label{font-size:12px;display:flex;align-items:center;gap:6px}
+          .ratio-editor-pages{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:4px}.ratio-editor-pages button{border:0;background:transparent;border-radius:8px;padding:8px 9px;text-align:right;display:grid;grid-template-columns:26px 1fr;gap:6px;align-items:start;font:inherit;color:#334155;cursor:pointer}.ratio-editor-pages button:hover{background:#f1f5f9}.ratio-editor-pages button.is-active{background:#e8eef8;color:#1f2a44}.ratio-editor-pages b{width:24px;height:24px;border-radius:999px;background:#1f2a44;color:#fff;display:grid;place-items:center;font-size:11px}.ratio-editor-pages span{font-size:12px;line-height:1.35;padding-top:3px}
+          .ratio-editor-preview{grid-column:1;grid-row:1;direction:rtl;min-width:0}.ratio-editor-toolbar{height:48px;background:#fff;border-bottom:1px solid #dbe3ee;position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:center;gap:14px;color:#334155;font-size:13px}.ratio-editor-toolbar button:disabled{opacity:.35}
+          .ratio-editor-canvas{padding:24px;display:flex;justify-content:center;align-items:flex-start;overflow:auto;min-height:calc(100vh - 48px)}.ratio-editor-page-scale{transform-origin:top center}.print-only{display:none}
+          @media(max-width:900px){.ratio-editor-shell{display:block}.ratio-editor-sidebar{position:static;height:auto;max-height:38vh;border-right:0;border-bottom:1px solid #dbe3ee}.ratio-editor-preview{display:block}.ratio-editor-canvas{padding:8px}}
+          @media print{.no-print{display:none!important}.ratio-editor-shell,.ratio-editor-preview,.ratio-editor-canvas{display:block!important;background:#fff!important;padding:0!important;overflow:visible!important}.ratio-editor-page-scale{display:none!important}.print-only{display:block!important}.print-only .worksheet-page{zoom:1!important;box-shadow:none!important;page-break-after:always;page-break-inside:avoid}.print-only .worksheet-page:last-child{page-break-after:auto}}
+          EOF
+
+          cat > index.html <<'EOF'
+          <!doctype html>
+          <html lang="he" dir="rtl">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <meta name="robots" content="noindex,nofollow" />
+              <title>יחס ופרופורציה — סביבת עריכה</title>
+            </head>
+            <body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body>
+          </html>
+          EOF
+
+      - name: Create deterministic project configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > package.json <<'EOF'
+          {
+            "name": "ratio-workbook",
+            "private": true,
+            "version": "1.0.0",
+            "type": "module",
+            "scripts": {
+              "dev": "vite",
+              "build": "vite build",
+              "typecheck": "tsc --noEmit",
+              "test": "vitest run",
+              "source:check": "node scripts/check-source-of-truth.mjs",
+              "manifest:check": "node scripts/generate-content-manifest.mjs",
+              "manifest:write": "node scripts/generate-content-manifest.mjs --write",
+              "quality:check": "npm run source:check && npm run typecheck && npm test && npm run manifest:check",
+              "preview:build": "npm run build && node scripts/_build-full-workbook.mjs preview/ratio-preview/full-workbook.html",
+              "preview:verify": "node scripts/verify-full-workbook.mjs preview/ratio-preview/full-workbook.html preview/ratio-preview/audit",
+              "verify": "npm run quality:check && npm run manifest:write && npm run preview:build && npm run preview:verify"
+            },
+            "dependencies": {
+              "clsx": "2.1.1",
+              "react": "18.3.1",
+              "react-dom": "18.3.1",
+              "tailwind-merge": "2.6.0"
+            },
+            "devDependencies": {
+              "@testing-library/jest-dom": "6.6.0",
+              "@types/node": "22.16.5",
+              "@types/react": "18.3.23",
+              "@types/react-dom": "18.3.7",
+              "@vitejs/plugin-react-swc": "3.11.0",
+              "autoprefixer": "10.4.21",
+              "jsdom": "20.0.3",
+              "playwright": "1.61.1",
+              "postcss": "8.5.6",
+              "tailwindcss": "3.4.17",
+              "typescript": "5.8.3",
+              "vite": "5.4.19",
+              "vitest": "3.2.4"
+            }
+          }
+          EOF
+
+          cat > vite.config.ts <<'EOF'
+          import { defineConfig } from 'vite';
+          import react from '@vitejs/plugin-react-swc';
+          import path from 'node:path';
+          import { fileURLToPath } from 'node:url';
+
+          const root = path.dirname(fileURLToPath(import.meta.url));
+          export default defineConfig({
+            plugins: [react()],
+            server: { host: true, port: 8080 },
+            resolve: { alias: { '@': path.resolve(root, 'src') } }
+          });
+          EOF
+
+          cat > vitest.config.ts <<'EOF'
+          import { defineConfig } from 'vitest/config';
+          import path from 'node:path';
+          import { fileURLToPath } from 'node:url';
+
+          const root = path.dirname(fileURLToPath(import.meta.url));
+          export default defineConfig({
+            resolve: { alias: { '@': path.resolve(root, 'src') } },
+            test: { environment: 'jsdom', globals: true, setupFiles: ['./src/test/setup.ts'] }
+          });
+          EOF
+
+          cat > tsconfig.json <<'EOF'
+          {
+            "compilerOptions": {
+              "target": "ES2020",
+              "useDefineForClassFields": true,
+              "lib": ["ES2020", "DOM", "DOM.Iterable"],
+              "module": "ESNext",
+              "moduleResolution": "Bundler",
+              "allowImportingTsExtensions": true,
+              "resolveJsonModule": true,
+              "isolatedModules": true,
+              "esModuleInterop": true,
+              "allowSyntheticDefaultImports": true,
+              "strict": true,
+              "noEmit": true,
+              "jsx": "react-jsx",
+              "skipLibCheck": true,
+              "baseUrl": ".",
+              "paths": { "@/*": ["./src/*"] },
+              "types": ["vitest/globals"]
+            },
+            "include": ["src", "vite.config.ts", "vitest.config.ts"]
+          }
+          EOF
+
+          cat > tailwind.config.ts <<'EOF'
+          import type { Config } from 'tailwindcss';
+          export default {
+            content: ['./index.html', './src/**/*.{ts,tsx}'],
+            theme: {
+              extend: {
+                colors: {
+                  border: 'hsl(var(--border))',
+                  background: 'hsl(var(--background))',
+                  foreground: 'hsl(var(--foreground))',
+                  card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+                  primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+                  secondary: { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+                  muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+                  accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' }
+                }
+              }
+            },
+            plugins: []
+          } satisfies Config;
+          EOF
+
+          cat > postcss.config.js <<'EOF'
+          export default { plugins: { tailwindcss: {}, autoprefixer: {} } };
+          EOF
+
+          cat > .gitignore <<'EOF'
+          node_modules/
+          dist/
+          preview/
+          content-manifest.json
+          *.log
+          .DS_Store
+          EOF
+
+      - name: Remove legacy network and path dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          css = Path('src/index.css')
+          text = css.read_text(encoding='utf-8')
+          lines = text.splitlines()
+          lines = [line for line in lines if 'fonts.googleapis.com' not in line]
+          text = '\n'.join(lines) + '\n'
+          text = text.replace("font-family: 'Heebo', 'Assistant', sans-serif;", "font-family: 'Rubik', Arial, sans-serif;")
+          text = text.replace("font-family: 'David Libre', 'David', serif;", "font-family: 'Rubik', Arial, sans-serif;")
+          css.write_text(text, encoding='utf-8')
+
+          build = Path('scripts/_build-full-workbook.mjs')
+          text = build.read_text(encoding='utf-8')
+          text = text.replace("const repoRoot = path.resolve(projectRoot, '..', '..', '..');", "const repoRoot = projectRoot;")
+          text = text.replace(".wb-page{box-shadow:none!important;page-break-after:always;page-break-inside:avoid}", ".wb-page{zoom:1!important;box-shadow:none!important;page-break-after:always;page-break-inside:avoid}")
+          build.write_text(text, encoding='utf-8')
+
+          verify = Path('scripts/verify-full-workbook.mjs')
+          text = verify.read_text(encoding='utf-8')
+          needle = "await page.emulateMedia({ media: 'print' });\n"
+          insertion = """await page.emulateMedia({ media: 'print' });
+          const printMetrics = await page.locator('.wb-page').evaluateAll((nodes) => nodes.map((node, index) => {
+            const rect = node.getBoundingClientRect();
+            return { page: index + 1, width: rect.width, height: rect.height, zoom: getComputedStyle(node).zoom || '1' };
+          }));
+          for (const metric of printMetrics) {
+            if (Math.abs(metric.width - 793.7) > 3) failures.push(`Print page ${metric.page}: A4 width drift (${metric.width}px).`);
+            if (Math.abs(metric.height - 1122.5) > 4) failures.push(`Print page ${metric.page}: A4 height drift (${metric.height}px).`);
+            if (metric.zoom !== '1' && metric.zoom !== 'normal') failures.push(`Print page ${metric.page}: zoom is ${metric.zoom}, expected 1.`);
+          }
+          """
+          if needle not in text:
+              raise SystemExit('Could not patch print verification hook')
+          text = text.replace(needle, insertion, 1)
+          verify.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Add single-source guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > scripts/check-source-of-truth.mjs <<'EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+
+          const root = process.cwd();
+          const required = path.join(root, 'SOURCE_OF_TRUTH.md');
+          if (!fs.existsSync(required)) throw new Error('Missing SOURCE_OF_TRUTH.md');
+
+          const forbiddenFiles = [
+            'COMPLIANCE-PLAN.md', 'PARABULA-INTEGRATION.md', 'bun.lock', 'bun.lockb',
+            'src/teacher-intro-pages.css', 'src/components/worksheet/corrected/TeacherIntroPages.tsx'
+          ];
+          for (const file of forbiddenFiles) {
+            if (fs.existsSync(path.join(root, file))) throw new Error(`Forbidden legacy file: ${file}`);
+          }
+
+          const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+          if (!readme.includes('SOURCE_OF_TRUTH.md')) throw new Error('README must point to SOURCE_OF_TRUTH.md');
+          if (readme.length > 2200) throw new Error('README is too large; requirements belong only in SOURCE_OF_TRUTH.md');
+
+          const scanRoots = ['src', 'scripts', '.github/workflows'];
+          const forbidden = [/sources\/lovable\/ratio-workbook/g, /yanivmizrachiy\/razpages/g];
+          function walk(dir) {
+            if (!fs.existsSync(dir)) return [];
+            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+              const full = path.join(dir, entry.name);
+              return entry.isDirectory() ? walk(full) : [full];
+            });
+          }
+          for (const file of scanRoots.flatMap((item) => walk(path.join(root, item)))) {
+            if (!/\.(?:[cm]?[jt]sx?|css|md|ya?ml|json)$/.test(file)) continue;
+            const text = fs.readFileSync(file, 'utf8');
+            for (const pattern of forbidden) {
+              if (pattern.test(text)) throw new Error(`Legacy source reference in ${path.relative(root, file)}`);
+              pattern.lastIndex = 0;
+            }
+          }
+          console.log('Single source-of-truth guard passed.');
+          EOF
+
+          cat > README.md <<'EOF'
+          # חוברת יחס ופרופורציה — כיתה ח׳
+
+          זהו הריפו הקנוני היחיד של פרויקט היחס.
+
+          **כל הדרישות והכללים נמצאים רק ב־[`SOURCE_OF_TRUTH.md`](./SOURCE_OF_TRUTH.md).**
+          אין להשתמש ב־README כמסמך דרישות נוסף.
+
+          ## עריכה מהירה
+
+          ```bash
+          npm ci
+          npm run dev
+          ```
+
+          ## בדיקה מלאה לפני Preview
+
+          ```bash
+          npx playwright install chromium
+          npm run verify
+          ```
+
+          `npm run verify` מבצע בדיקות מקור אמת, TypeScript, בדיקות מבנה ומתמטיקה, manifest, build עצמאי, Chromium A4 audit, screenshots ו־PDF.
+
+          ## בטיחות Production
+
+          `main` הוא הקישור הציבורי שנשלח למורים. אין לפרסם אליו שינוי בלי Preview מלא ואישור מפורש של יניב.
+          EOF
+
+      - name: Create permanent preview verification workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > .github/workflows/verify-preview.yml <<'EOF'
+          name: Ratio Single Source Verify
+
+          on:
+            push:
+              branches:
+                - agent/single-source-migration-20260819
+            pull_request:
+              branches:
+                - main
+            workflow_dispatch:
+
+          permissions:
+            contents: read
+
+          concurrency:
+            group: ratio-single-source-${{ github.ref }}
+            cancel-in-progress: true
+
+          jobs:
+            verify:
+              runs-on: ubuntu-latest
+              timeout-minutes: 45
+              steps:
+                - uses: actions/checkout@v4
+                - uses: actions/setup-node@v4
+                  with:
+                    node-version: 22
+                    cache: npm
+                - run: npm ci
+                - run: npx playwright install --with-deps chromium
+                - run: npm run verify
+                - name: Upload complete preview
+                  if: always()
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: ratio-single-source-preview-${{ github.run_number }}
+                    path: |
+                      preview/ratio-preview/full-workbook.html
+                      preview/ratio-preview/full-workbook-artifact.html
+                      preview/ratio-preview/audit/audit.json
+                      preview/ratio-preview/audit/ratio-workbook-preview.pdf
+                      preview/ratio-preview/audit/pages/*.png
+                      content-manifest.json
+                    if-no-files-found: error
+                    retention-days: 30
+          EOF
+
+      - name: Install exact dependencies and verify migrated source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f package-lock.json
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+          npm run verify
+
+      - name: Ensure all migration invariants before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f SOURCE_OF_TRUTH.md
+          test -f src/data/worksheetPages.tsx
+          test -f scripts/_build-full-workbook.mjs
+          test -f scripts/verify-full-workbook.mjs
+          test -f vendor/fonts/rubik.css
+          test ! -e src/components/worksheet/corrected/TeacherIntroPages.tsx
+          test ! -e src/teacher-intro-pages.css
+          test ! -e bun.lock
+          test ! -e bun.lockb
+          test ! -d sources
+          test ! -d avodat-kayitz-h8-meztaynim
+          grep -q 'ratio-page-01' src/data/worksheetPages.tsx
+          grep -q "toHaveLength(55)" src/test/workbookStructure.test.tsx
+          node -e "const a=require('./preview/ratio-preview/audit/audit.json'); if(a.status!=='pass'||a.teacherPages!==0||a.firstStudentPage!==1||a.semanticPages!==55) process.exit(1); console.log(a)"
+
+      - name: Remove one-time migration workflow from the migrated tree
+        shell: bash
+        run: rm -f .github/workflows/migrate-single-source.yml
+
+      - name: Commit the self-contained source to the isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Ratio Migration Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "[migration-sync] העברת פרויקט יחס למקור אמת יחיד עצמאי"
+          git push origin HEAD:agent/single-source-migration-20260819
