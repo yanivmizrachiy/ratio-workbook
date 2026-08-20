@@ -97,3 +97,10 @@
   padding-top: 2px;
   padding-bottom: 3px;
 }
+
+/* Graphic legibility fix without touching hash-locked source content: this one wide instructional
+   rectangle was inheriting the generic compact 100px wrapper, which made its labels too small.
+   Keep the same SVG geometry/content and only restore the normal geometry optical width. */
+.ratio-source-page-29 .geo-figure.compact:has(svg[aria-label^="מלבן ABCD שאורכו 6p"]) {
+  max-width: 160px;
+}
