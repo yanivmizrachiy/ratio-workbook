@@ -201,10 +201,10 @@
   max-width: 155px;
 }
 .geo-figure.compact:has(> .math-graphic[aria-label^="מלבן ABCD שאורכו 6p"]) {
-  max-width: 310px;
+  max-width: 380px;
 }
 .math-graphic[aria-label^="מלבן ABCD שאורכו 6p"] {
-  width: 310px !important;
+  width: 380px !important;
   height: auto !important;
   max-width: 100%;
   display: block;
