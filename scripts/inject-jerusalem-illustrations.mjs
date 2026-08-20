@@ -20,6 +20,7 @@ const css = `
 `;
 
 const marker = "    [].forEach.call(document.querySelectorAll('.wb-page .wb-body'),function(body){";
+const guardedMarker = "    [].forEach.call(document.querySelectorAll('.wb-page:not([data-has-jerusalem-illustration]) .wb-body'),function(body){";
 const injection = `
     (function attachJerusalemIllustrations(){
       var IMAGE_COUNT=7;
@@ -97,7 +98,7 @@ function inject(file) {
     throw new Error(`Jerusalem illustrations are already injected into ${file}`);
   }
   if (!html.includes(marker)) throw new Error(`Paginator marker not found in ${file}`);
-  html = html.replace(marker, injection + marker);
+  html = html.replace(marker, injection + guardedMarker);
 
   if (html.includes('</head>')) {
     html = html.replace('</head>', `<style>${css}</style>\n</head>`);
