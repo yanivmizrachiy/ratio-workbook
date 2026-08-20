@@ -61,7 +61,6 @@ replaceOnce(
   ['רפי', 'גלעד'],
   ['אלי', 'איתי'],
   ['דני', 'גלעד'],
-  ['רנ', 'איתי'],
   ['רן', 'איתי'],
   ['עידן', 'אריאל'],
   ['טל', 'רותם'],
@@ -74,13 +73,9 @@ const APPROVED_CONTEXT_REPLACEMENTS = [
 
 const LEGACY_PERSON_NAME_GUARDS = APPROVED_PERSON_NAME_REPLACEMENTS.map(([from]) => from);
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^\\${}()|[\\]\\\\]/g, '\\\\$&');
-}
-
 function replacePersonToken(html, from, to) {
   if (from.includes(' ') || /[\\u0591-\\u05C7]/.test(from)) return html.split(from).join(to);
-  const pattern = new RegExp('(?<![א-ת])([ובלמשכה]{0,2})' + escapeRegExp(from) + '(?![א-ת])', 'g');
+  const pattern = new RegExp('(?<![א-ת])([ובלמשכה]{0,2})' + from + '(?![א-ת])', 'g');
   return html.replace(pattern, (_match, prefix) => prefix + to);
 }
 
@@ -93,7 +88,7 @@ function applyApprovedPersonNames(html) {
 
 function hasLegacyPersonName(html, name) {
   if (name.includes(' ') || /[\\u0591-\\u05C7]/.test(name)) return html.includes(name);
-  const pattern = new RegExp('(?<![א-ת])([ובלמשכה]{0,2})' + escapeRegExp(name) + '(?![א-ת])');
+  const pattern = new RegExp('(?<![א-ת])([ובלמשכה]{0,2})' + name + '(?![א-ת])');
   return pattern.test(html);
 }
 
