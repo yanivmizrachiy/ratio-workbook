@@ -37,9 +37,13 @@ jobs:
           path: |
             preview/full-workbook.html
             preview/full-workbook-artifact.html
+            preview/graphics-inventory-source.json
             preview/audit/audit.json
+            preview/audit/graphics-golden-candidate.json
             preview/audit/ratio-workbook-preview.pdf
             preview/audit/pages/*.png
+            preview/audit/graphics/*.png
+            preview/audit/grayscale/*.png
             content-manifest.json
           if-no-files-found: error
           retention-days: 30
