@@ -2,14 +2,9 @@ import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 export type TextbookBoxSize = 'sm' | 'md' | 'lg';
-export type TextbookWorkAreaSize = 'md' | 'lg';
 
 export function TextbookAnswerBox({ size = 'md', className }: { size?: TextbookBoxSize; className?: string }) {
   return <span className={cn('textbook-answer-box', `textbook-answer-box--${size}`, className)} aria-hidden="true" />;
-}
-
-export function TextbookWorkArea({ size = 'lg', ariaLabel = 'מקום לכתיבת דרך' }: { size?: TextbookWorkAreaSize; ariaLabel?: string }) {
-  return <div className={cn('textbook-work-area', `textbook-work-area--${size}`)} role="img" aria-label={ariaLabel} />;
 }
 
 export function TextbookFraction({ numerator, denominator }: { numerator?: ReactNode; denominator?: ReactNode }) {
