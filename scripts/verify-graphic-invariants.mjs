@@ -29,6 +29,8 @@ try {
     let labelsOutside = 0;
     let textCollisions = 0;
     let primitiveOutside = 0;
+    const labelOutsideDetails = [];
+    const collisionDetails = [];
     const undersizedInstructional = [];
 
     const overlapRatio = (a, b) => {
@@ -42,8 +44,10 @@ try {
     };
 
     for (const [index, svg] of svgs.entries()) {
+      const graphicNumber = index + 1;
       const family = svg.getAttribute('data-graphic-family') || '';
-      if (!(family in familyCounts)) failures.push(`Graphic ${index + 1} has unknown family: ${family || 'missing'}.`);
+      const graphicLabel = svg.getAttribute('aria-label') || '';
+      if (!(family in familyCounts)) failures.push(`Graphic ${graphicNumber} has unknown family: ${family || 'missing'}.`);
       else familyCounts[family] += 1;
 
       const viewBox = svg.getAttribute('viewBox');
@@ -63,13 +67,27 @@ try {
       });
       for (const text of texts) {
         const r = text.getBoundingClientRect();
-        if (r.left < outer.left - 3 || r.right > outer.right + 3 || r.top < outer.top - 3 || r.bottom > outer.bottom + 3) labelsOutside += 1;
+        if (r.left < outer.left - 3 || r.right > outer.right + 3 || r.top < outer.top - 3 || r.bottom > outer.bottom + 3) {
+          labelsOutside += 1;
+          labelOutsideDetails.push({ graphic: graphicNumber, family, text: (text.textContent || '').trim(), ariaLabel: graphicLabel.slice(0, 100) });
+        }
       }
       for (let i = 0; i < texts.length; i++) {
         const a = texts[i].getBoundingClientRect();
         for (let j = i + 1; j < texts.length; j++) {
           const b = texts[j].getBoundingClientRect();
-          if (overlapRatio(a, b) > 0.55) textCollisions += 1;
+          const ratio = overlapRatio(a, b);
+          if (ratio > 0.55) {
+            textCollisions += 1;
+            collisionDetails.push({
+              graphic: graphicNumber,
+              family,
+              a: (texts[i].textContent || '').trim(),
+              b: (texts[j].textContent || '').trim(),
+              overlap: Math.round(ratio * 1000) / 1000,
+              ariaLabel: graphicLabel.slice(0, 100),
+            });
+          }
         }
       }
 
@@ -79,19 +97,21 @@ try {
         if (r.left < outer.left - 4 || r.right > outer.right + 4 || r.top < outer.top - 4 || r.bottom > outer.bottom + 4) primitiveOutside += 1;
       }
 
-      const context = `${svg.parentElement?.className || ''} ${svg.getAttribute('aria-label') || ''}`;
+      const context = `${svg.parentElement?.className || ''} ${graphicLabel}`;
       const instructional = /graph-container|bar-chart-container|number-line-container|bags-illustration|geometry|geo-|svg-center|משולש|מלבן|טרפז|ציר מספרים|דיאגרמ/.test(context);
-      if (instructional && outer.width < 115 && outer.height < 55) undersizedInstructional.push(index + 1);
+      if (instructional && outer.width < 115 && outer.height < 55) {
+        undersizedInstructional.push({ graphic: graphicNumber, family, width: Math.round(outer.width), height: Math.round(outer.height), ariaLabel: graphicLabel.slice(0, 100) });
+      }
     }
 
     if (missingViewBox) failures.push(`${missingViewBox} normalized SVG(s) are missing viewBox.`);
     if (invalidViewBox) failures.push(`${invalidViewBox} SVG(s) have invalid viewBox values.`);
     if (missingPrecision) failures.push(`${missingPrecision} SVG(s) are missing geometric precision rendering.`);
     if (missingAspectRatio) failures.push(`${missingAspectRatio} SVG(s) are missing canonical preserveAspectRatio.`);
-    if (labelsOutside) failures.push(`${labelsOutside} SVG text label(s) extend outside their rendered graphic bounds.`);
-    if (textCollisions) failures.push(`${textCollisions} severe SVG text-to-text collision(s) detected.`);
+    if (labelsOutside) failures.push(`${labelsOutside} SVG text label(s) extend outside their rendered graphic bounds: ${JSON.stringify(labelOutsideDetails)}.`);
+    if (textCollisions) failures.push(`${textCollisions} severe SVG text-to-text collision(s) detected: ${JSON.stringify(collisionDetails)}.`);
     if (primitiveOutside) failures.push(`${primitiveOutside} SVG primitive(s) extend outside their rendered graphic bounds.`);
-    if (undersizedInstructional.length) failures.push(`Instructional graphics are optically undersized: ${undersizedInstructional.join(', ')}.`);
+    if (undersizedInstructional.length) failures.push(`Instructional graphics are optically undersized: ${JSON.stringify(undersizedInstructional)}.`);
     for (const family of expectedFamilies) if (familyCounts[family] === 0) failures.push(`No rendered graphics found for expected family: ${family}.`);
 
     const windowSvg = document.querySelector('svg[aria-label^="חלון ריבועי"]');
@@ -149,8 +169,8 @@ try {
     for (const [index, svg] of grids.entries()) {
       const vb = svg.viewBox.baseVal;
       if (!(vb.width > 0 && vb.height > 0)) failures.push(`Grid ${index + 1} has invalid logical dimensions.`);
-      const rects = [...svg.querySelectorAll('rect')];
-      if (!rects.length) failures.push(`Grid ${index + 1} has no rect cells.`);
+      const structural = [...svg.querySelectorAll('rect,line,polygon,polyline,path')];
+      if (structural.length < 2) failures.push(`Grid ${index + 1} has insufficient vector structure (${structural.length} structural primitive(s)).`);
     }
 
     const geometry = [...document.querySelectorAll('svg[data-graphic-family="geometry"]')];
@@ -171,7 +191,9 @@ try {
       missingPrecision,
       missingAspectRatio,
       labelsOutside,
+      labelOutsideDetails,
       textCollisions,
+      collisionDetails,
       primitiveOutside,
       undersizedInstructional,
       windowDiagramChecked: Boolean(windowSvg),
