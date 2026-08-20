@@ -1,0 +1,116 @@
+/* Canonical mathematical graphics system.
+   This is a first-class design layer, not a page-specific override sheet. */
+
+.worksheet-page {
+  --gfx-ink: #1f2a44;
+  --gfx-ink-soft: #475569;
+  --gfx-grid: #d8e0eb;
+  --gfx-grid-strong: #a8b5c6;
+  --gfx-fill-light: #f3f6fa;
+  --gfx-fill-mid: #cbd5e1;
+  --gfx-fill-dark: #64748b;
+  --gfx-accent: #1f2a44;
+  --gfx-stroke-fine: 0.9px;
+  --gfx-stroke-normal: 1.5px;
+  --gfx-stroke-strong: 2px;
+  --gfx-dot-radius: 1.45px;
+  --gfx-label-size: 11px;
+  --gfx-small-label-size: 9px;
+}
+
+.worksheet-page svg,
+.worksheet-page .math-graphic {
+  max-width: 100%;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+  color: var(--gfx-ink);
+}
+
+.worksheet-page svg :is(line, path, polyline, polygon, rect, circle, ellipse),
+.worksheet-page .math-graphic :is(line, path, polyline, polygon, rect, circle, ellipse) {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.worksheet-page svg text,
+.worksheet-page .math-graphic text {
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  fill: var(--gfx-ink);
+}
+
+/* Normalize outline ink while preserving semantic black/white fills. */
+.worksheet-page svg [stroke="#000"],
+.worksheet-page svg [stroke="#111"],
+.worksheet-page svg [stroke="#222"],
+.worksheet-page svg [stroke="#333"],
+.worksheet-page svg [stroke="#172554"],
+.worksheet-page svg [stroke="#1f2a44"] {
+  stroke: var(--gfx-ink);
+}
+
+/* Quiet construction/grid lines must remain visibly secondary. */
+.worksheet-page svg [stroke="#ddd"],
+.worksheet-page svg [stroke="#dbe3ef"] {
+  stroke: var(--gfx-grid);
+}
+
+.worksheet-page svg [stroke="#888"],
+.worksheet-page svg [stroke="#94a3b8"] {
+  stroke: var(--gfx-grid-strong);
+}
+
+/* Existing gray fills are harmonized without changing which regions are filled. */
+.worksheet-page svg [fill="#ccc"] { fill: var(--gfx-fill-mid); }
+.worksheet-page svg [fill="#999"] { fill: #94a3b8; }
+.worksheet-page svg [fill="#888"] { fill: #8290a6; }
+.worksheet-page svg [fill="#555"] { fill: #52637d; }
+
+/* Family-specific polish. The renderer assigns data-graphic-family at runtime. */
+.math-graphic[data-graphic-family="chart"] {
+  overflow: visible;
+}
+.math-graphic[data-graphic-family="chart"] text {
+  font-weight: 500;
+}
+.math-graphic[data-graphic-family="chart"] rect[fill]:not([fill="none"]):not([fill="#fff"]):not([fill="white"]) {
+  stroke: var(--gfx-ink-soft);
+  stroke-width: 0.7px;
+}
+.math-graphic[data-graphic-family="geometry"] {
+  overflow: visible;
+}
+.math-graphic[data-graphic-family="geometry"] text {
+  font-weight: 600;
+}
+.math-graphic[data-graphic-family="number-line"] text,
+.math-graphic[data-graphic-family="ratio-model"] text {
+  font-weight: 600;
+}
+
+/* Dots, beads and counters remain high contrast in grayscale and print. */
+.math-graphic[data-graphic-family="counters"] circle[fill="#000"],
+.math-graphic[data-graphic-family="counters"] circle[fill="#111"] {
+  fill: #111827;
+}
+.math-graphic[data-graphic-family="counters"] circle[fill="#fff"] {
+  fill: #fff;
+  stroke: var(--gfx-ink);
+}
+
+/* Preserve crisp line hierarchy in print; never rely on shadows or raster effects. */
+@media print {
+  .worksheet-page svg,
+  .worksheet-page .math-graphic {
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .worksheet-page svg text,
+  .worksheet-page .math-graphic text {
+    fill: #111827;
+  }
+  .worksheet-page svg [stroke="#ddd"],
+  .worksheet-page svg [stroke="#dbe3ef"] {
+    stroke: #cbd5e1;
+  }
+}
