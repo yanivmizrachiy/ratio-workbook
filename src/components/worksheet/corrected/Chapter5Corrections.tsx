@@ -47,7 +47,7 @@ function CookieTray({ label, brown, total = 20 }: { label: string; brown: number
 
 function RectangleChallenge() {
   return (
-    <div className="geo-figure">
+    <div className="geo-figure compact">
       <svg
         viewBox="0 0 240 100"
         className="geo-svg"
