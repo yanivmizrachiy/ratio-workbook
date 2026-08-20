@@ -172,10 +172,11 @@ body{margin:0;background:#e9edf3;font-family:Rubik,Assistant,Arial,sans-serif;fo
 @page{size:A4;margin:0}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{max-width:none!important;overflow:visible!important}
   body{background:#fff}
-  .wb-doc{gap:0;padding:0}
-  .wb-page{zoom:1!important;box-shadow:none!important;page-break-after:always;page-break-inside:avoid}
-  .wb-page:last-child{page-break-after:auto}
+  .wb-doc{display:block!important;width:210mm!important;gap:0!important;padding:0!important;margin:0!important}
+  .wb-page{display:flex!important;width:210mm!important;height:297mm!important;zoom:1!important;box-shadow:none!important;margin:0!important;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}
+  .wb-page:last-child{break-after:auto;page-break-after:auto}
   .wb-pagination-error{display:none!important}
 }
 `;
