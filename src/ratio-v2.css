@@ -14,6 +14,15 @@
   --ws-accent-soft: #eef1f7;
   --ws-fill: #dbeafe;
   --ws-fill-strong: #64748b;
+  --ws-font-body: 14px;
+  --ws-font-small: 12px;
+  --ws-font-title: 18px;
+  --ws-font-display: 22px;
+  --ws-line-height: 1.48;
+  --ws-space-1: 4px;
+  --ws-space-2: 8px;
+  --ws-space-3: 12px;
+  --ws-answer-h: 30px;
   width: 210mm;
   height: 297mm;
   overflow: visible;
@@ -71,8 +80,8 @@
   padding: 7mm 14mm 9mm;
   overflow: visible;
   font-family: 'Rubik', 'Assistant', Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.48;
+  font-size: var(--ws-font-body);
+  line-height: var(--ws-line-height);
   color: var(--ws-ink);
 }
 
@@ -416,6 +425,158 @@
   box-shadow: none;
 }
 
+/* Shared textbook primitives — one system for current and future approved additions. */
+.textbook-answer-box {
+  display: inline-block;
+  height: var(--ws-answer-h);
+  border: 1.35px solid var(--ws-accent);
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+.textbook-answer-box--sm { width: 30px; }
+.textbook-answer-box--md { width: 38px; }
+.textbook-answer-box--lg { width: 72px; }
+
+.textbook-fraction {
+  display: inline-grid;
+  grid-template-rows: minmax(var(--ws-answer-h), auto) 1px minmax(var(--ws-answer-h), auto);
+  align-items: center;
+  justify-items: center;
+  min-width: 46px;
+  margin-inline: 5px;
+  vertical-align: middle;
+  direction: ltr;
+  unicode-bidi: isolate;
+  line-height: 1;
+}
+.textbook-fraction-slot {
+  min-height: var(--ws-answer-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ws-font-body);
+  font-weight: 600;
+}
+.textbook-fraction-line {
+  width: 100%;
+  min-width: 40px;
+  height: 1.35px;
+  background: var(--ws-accent);
+}
+
+.textbook-ratio-answer {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline: 4px;
+  vertical-align: middle;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.textbook-ratio-colon {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ws-ink);
+}
+
+.textbook-select {
+  min-width: 118px;
+  height: 30px;
+  border: 1.2px solid #94a3b8;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ws-ink);
+  font: inherit;
+  line-height: 1;
+  margin-inline: 4px;
+  padding-inline: 7px 28px;
+  vertical-align: middle;
+}
+
+.textbook-down-arrow {
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+  color: var(--ws-accent);
+  margin: var(--ws-space-1) 0;
+}
+
+.textbook-activity-title {
+  font-size: var(--ws-font-title);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--ws-accent);
+  margin: 0 0 var(--ws-space-2);
+}
+
+.textbook-question-title {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0 0 var(--ws-space-3);
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+}
+.textbook-question-title strong {
+  font-size: 17px;
+  color: var(--ws-accent);
+}
+.textbook-question-title span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.approved-proportion-page .page-content {
+  font-size: var(--ws-font-body);
+  line-height: var(--ws-line-height);
+}
+.approved-proportion-content {
+  display: grid;
+  gap: var(--ws-space-3);
+}
+.approved-proportion-content p {
+  margin: 0;
+}
+.approved-proportion-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.approved-proportion-row--center {
+  justify-content: center;
+}
+.approved-proportion-row--spread {
+  justify-content: space-around;
+  align-items: flex-start;
+}
+.approved-proportion-center {
+  text-align: center;
+}
+.approved-proportion-emphasis {
+  font-size: var(--ws-font-display);
+  font-weight: 700;
+  color: var(--ws-accent);
+}
+.approved-proportion-label {
+  color: var(--ws-accent);
+  font-weight: 700;
+}
+.approved-proportion-pair {
+  text-align: center;
+  min-width: 150px;
+}
+.approved-proportion-pair-title {
+  font-weight: 600;
+  margin-bottom: var(--ws-space-1);
+}
+.approved-proportion-spacer--sm { height: 6px; }
+.approved-proportion-spacer--md { height: 10px; }
+
 @media screen and (max-width: 1023px) {
   .ratio-workbench {
     display: block;
@@ -448,5 +609,11 @@
     background: #fff !important;
     color: var(--ws-accent-2) !important;
     border-bottom-color: var(--ws-accent) !important;
+  }
+
+  .textbook-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-inline: 7px;
   }
 }
