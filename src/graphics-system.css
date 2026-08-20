@@ -40,39 +40,27 @@
   fill: var(--gfx-ink);
 }
 
-/* Normalize outline ink while preserving semantic black/white fills. */
 .worksheet-page svg [stroke="#000"],
 .worksheet-page svg [stroke="#111"],
 .worksheet-page svg [stroke="#222"],
 .worksheet-page svg [stroke="#333"],
 .worksheet-page svg [stroke="#172554"],
-.worksheet-page svg [stroke="#1f2a44"] {
-  stroke: var(--gfx-ink);
-}
+.worksheet-page svg [stroke="#1f2a44"] { stroke: var(--gfx-ink); }
 
-/* Quiet construction/grid lines must remain visibly secondary. */
 .worksheet-page svg [stroke="#ddd"],
 .worksheet-page svg [stroke="#dbe3ef"],
-.worksheet-page svg [stroke="#e2e2e2"] {
-  stroke: var(--gfx-grid);
-}
+.worksheet-page svg [stroke="#e2e2e2"] { stroke: var(--gfx-grid); }
 
 .worksheet-page svg [stroke="#888"],
-.worksheet-page svg [stroke="#94a3b8"] {
-  stroke: var(--gfx-grid-strong);
-}
+.worksheet-page svg [stroke="#94a3b8"] { stroke: var(--gfx-grid-strong); }
 
-/* Existing gray fills are harmonized without changing which regions are filled. */
 .worksheet-page svg [fill="#ccc"] { fill: var(--gfx-fill-mid); }
 .worksheet-page svg [fill="#999"] { fill: #94a3b8; }
 .worksheet-page svg [fill="#888"] { fill: #8290a6; }
 .worksheet-page svg [fill="#555"] { fill: #52637d; }
 .worksheet-page svg [fill="#9ca3af"] { fill: #a7b1bf; }
 
-/* Family-specific polish. The renderer assigns data-graphic-family at runtime. */
-.math-graphic[data-graphic-family="chart"] {
-  overflow: visible;
-}
+.math-graphic[data-graphic-family="chart"] { overflow: visible; }
 .math-graphic[data-graphic-family="chart"] text {
   font-weight: 500;
   paint-order: stroke fill;
@@ -84,9 +72,7 @@
   stroke: var(--gfx-ink-soft);
   stroke-width: 0.8px;
 }
-.math-graphic[data-graphic-family="geometry"] {
-  overflow: visible;
-}
+.math-graphic[data-graphic-family="geometry"] { overflow: visible; }
 .math-graphic[data-graphic-family="geometry"] text {
   font-weight: 600;
   paint-order: stroke fill;
@@ -95,22 +81,15 @@
   stroke-linejoin: round;
 }
 .math-graphic[data-graphic-family="number-line"] text,
-.math-graphic[data-graphic-family="ratio-model"] text {
-  font-weight: 600;
-}
+.math-graphic[data-graphic-family="ratio-model"] text { font-weight: 600; }
 
-/* Dots, beads and counters remain high contrast in grayscale and print. */
 .math-graphic[data-graphic-family="counters"] circle[fill="#000"],
-.math-graphic[data-graphic-family="counters"] circle[fill="#111"] {
-  fill: #111827;
-}
+.math-graphic[data-graphic-family="counters"] circle[fill="#111"] { fill: #111827; }
 .math-graphic[data-graphic-family="counters"] circle[fill="#fff"] {
   fill: #fff;
   stroke: var(--gfx-ink);
 }
 
-/* Optical sizing: only block-level instructional graphics are enlarged.
-   Inline counters/answer symbols keep their compact pedagogical size. */
 .graph-container > .math-graphic[data-graphic-family="chart"] {
   width: min(100%, 356px) !important;
   height: auto !important;
@@ -135,9 +114,7 @@
   display: block;
   margin: 3px auto;
 }
-.bracelet-row .math-graphic[data-graphic-family="counters"] {
-  max-width: 275px;
-}
+.bracelet-row .math-graphic[data-graphic-family="counters"] { max-width: 275px; }
 .geo-mini.math-graphic[data-graphic-family="geometry"] {
   height: 58px !important;
   width: auto !important;
@@ -149,7 +126,6 @@
   max-width: 100%;
 }
 
-/* High-value individual diagrams that were visually undersized in the full-page review. */
 .math-graphic[aria-label^="משולש APB"] {
   height: 195px !important;
   width: auto !important;
@@ -210,8 +186,24 @@
   margin: 2px auto 5px;
 }
 
-/* High-value parametric window/grid diagram.
-   Geometry remains exactly 160 outer / 80 centre / 40 corner units; only presentation is upgraded. */
+/* Locked-source geometry corrections live here so source-task hashes remain immutable. */
+.wb-group[data-source-key="ch3-page-07"] .math-graphic[viewBox="0 0 200 80"] text:first-of-type {
+  transform: translateY(6px);
+}
+.wb-group[data-source-key="ch3-page-07"] .math-graphic[viewBox="0 0 200 80"] text:last-of-type {
+  transform: translateX(-6px);
+}
+.math-graphic[aria-label^="משולש ישר זווית ABC, הזווית ב־B ישרה"] text:nth-of-type(4) {
+  transform: translateX(9px);
+}
+.math-graphic[aria-label^="מלבן ABCD שאורכו 6p"] {
+  width: 320px !important;
+  height: auto !important;
+  max-width: 100%;
+  display: block;
+  margin: 3px auto 6px;
+}
+
 .math-graphic[aria-label^="חלון ריבועי"] {
   width: 235px !important;
   height: 235px !important;
@@ -232,15 +224,12 @@
   stroke: var(--gfx-ink);
   stroke-width: 1.8px;
 }
-.math-graphic[aria-label^="חלון ריבועי"] pattern circle {
-  fill: var(--gfx-blue);
-}
+.math-graphic[aria-label^="חלון ריבועי"] pattern circle { fill: var(--gfx-blue); }
 .math-graphic[aria-label^="חלון ריבועי"] > line {
   stroke: #9cabc0;
   stroke-width: 0.9px;
 }
 
-/* Preserve crisp hierarchy in print and make chart categories distinguishable in grayscale. */
 @media print {
   .worksheet-page svg,
   .worksheet-page .math-graphic {
@@ -248,23 +237,15 @@
     opacity: 1 !important;
   }
   .worksheet-page svg text,
-  .worksheet-page .math-graphic text {
-    fill: #111827;
-  }
+  .worksheet-page .math-graphic text { fill: #111827; }
   .worksheet-page svg [stroke="#ddd"],
   .worksheet-page svg [stroke="#dbe3ef"],
-  .worksheet-page svg [stroke="#e2e2e2"] {
-    stroke: #cbd5e1;
-  }
+  .worksheet-page svg [stroke="#e2e2e2"] { stroke: #cbd5e1; }
   .math-graphic[data-graphic-family="chart"] [fill="#5b9bd5"] { fill: #5f6f86; }
   .math-graphic[data-graphic-family="chart"] [fill="#ed7d31"] { fill: #aeb8c5; }
   .math-graphic[data-graphic-family="chart"] [fill="#a5a5a5"] { fill: #e4e8ee; }
   .math-graphic[data-graphic-family="chart"] [fill="#555"] { fill: #4b5563; }
   .math-graphic[data-graphic-family="chart"] [fill="#ccc"] { fill: #d1d5db; }
-  .math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] {
-    fill: #aeb4bd;
-  }
-  .math-graphic[aria-label^="חלון ריבועי"] pattern circle {
-    fill: #374151;
-  }
+  .math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] { fill: #aeb4bd; }
+  .math-graphic[aria-label^="חלון ריבועי"] pattern circle { fill: #374151; }
 }
