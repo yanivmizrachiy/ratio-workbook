@@ -196,8 +196,15 @@
 .math-graphic[aria-label^="משולש ישר זווית ABC, הזווית ב־B ישרה"] text:nth-of-type(4) {
   transform: translateX(9px);
 }
+/* The legacy source wrapper is capped at 100px; raise only these two high-value diagrams. */
+.geo-figure.compact:has(> .math-graphic[aria-label^="משולש ישר זווית ABC, הזווית ב־B ישרה"]) {
+  max-width: 155px;
+}
+.geo-figure.compact:has(> .math-graphic[aria-label^="מלבן ABCD שאורכו 6p"]) {
+  max-width: 310px;
+}
 .math-graphic[aria-label^="מלבן ABCD שאורכו 6p"] {
-  width: 320px !important;
+  width: 310px !important;
   height: auto !important;
   max-width: 100%;
   display: block;
