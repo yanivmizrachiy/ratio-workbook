@@ -10,6 +10,7 @@
   --gfx-fill-mid: #cbd5e1;
   --gfx-fill-dark: #64748b;
   --gfx-accent: #1f2a44;
+  --gfx-blue: #1e40af;
   --gfx-stroke-fine: 0.9px;
   --gfx-stroke-normal: 1.5px;
   --gfx-stroke-strong: 2px;
@@ -51,7 +52,8 @@
 
 /* Quiet construction/grid lines must remain visibly secondary. */
 .worksheet-page svg [stroke="#ddd"],
-.worksheet-page svg [stroke="#dbe3ef"] {
+.worksheet-page svg [stroke="#dbe3ef"],
+.worksheet-page svg [stroke="#e2e2e2"] {
   stroke: var(--gfx-grid);
 }
 
@@ -65,6 +67,7 @@
 .worksheet-page svg [fill="#999"] { fill: #94a3b8; }
 .worksheet-page svg [fill="#888"] { fill: #8290a6; }
 .worksheet-page svg [fill="#555"] { fill: #52637d; }
+.worksheet-page svg [fill="#9ca3af"] { fill: #a7b1bf; }
 
 /* Family-specific polish. The renderer assigns data-graphic-family at runtime. */
 .math-graphic[data-graphic-family="chart"] {
@@ -98,6 +101,36 @@
   stroke: var(--gfx-ink);
 }
 
+/* High-value parametric window/grid diagram.
+   Geometry remains exactly 160 outer / 80 centre / 40 corner units; only presentation is upgraded. */
+.math-graphic[aria-label^="חלון ריבועי"] {
+  width: 235px !important;
+  height: 235px !important;
+  display: block !important;
+  margin: 2px auto 5px;
+  overflow: visible;
+}
+.math-graphic[aria-label^="חלון ריבועי"] > rect:first-of-type {
+  stroke: var(--gfx-ink);
+  stroke-width: 2.35px;
+}
+.math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] {
+  fill: #a7b1bf;
+  stroke: var(--gfx-ink);
+  stroke-width: 1.25px;
+}
+.math-graphic[aria-label^="חלון ריבועי"] > rect[fill^="url("] {
+  stroke: var(--gfx-ink);
+  stroke-width: 1.8px;
+}
+.math-graphic[aria-label^="חלון ריבועי"] pattern circle {
+  fill: var(--gfx-blue);
+}
+.math-graphic[aria-label^="חלון ריבועי"] > line {
+  stroke: #9cabc0;
+  stroke-width: 0.9px;
+}
+
 /* Preserve crisp line hierarchy in print; never rely on shadows or raster effects. */
 @media print {
   .worksheet-page svg,
@@ -110,7 +143,14 @@
     fill: #111827;
   }
   .worksheet-page svg [stroke="#ddd"],
-  .worksheet-page svg [stroke="#dbe3ef"] {
+  .worksheet-page svg [stroke="#dbe3ef"],
+  .worksheet-page svg [stroke="#e2e2e2"] {
     stroke: #cbd5e1;
+  }
+  .math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] {
+    fill: #aeb4bd;
+  }
+  .math-graphic[aria-label^="חלון ריבועי"] pattern circle {
+    fill: #374151;
   }
 }
