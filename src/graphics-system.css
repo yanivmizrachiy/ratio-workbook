@@ -75,16 +75,24 @@
 }
 .math-graphic[data-graphic-family="chart"] text {
   font-weight: 500;
+  paint-order: stroke fill;
+  stroke: #fff;
+  stroke-width: 1.35px;
+  stroke-linejoin: round;
 }
 .math-graphic[data-graphic-family="chart"] rect[fill]:not([fill="none"]):not([fill="#fff"]):not([fill="white"]) {
   stroke: var(--gfx-ink-soft);
-  stroke-width: 0.7px;
+  stroke-width: 0.8px;
 }
 .math-graphic[data-graphic-family="geometry"] {
   overflow: visible;
 }
 .math-graphic[data-graphic-family="geometry"] text {
   font-weight: 600;
+  paint-order: stroke fill;
+  stroke: #fff;
+  stroke-width: 1.8px;
+  stroke-linejoin: round;
 }
 .math-graphic[data-graphic-family="number-line"] text,
 .math-graphic[data-graphic-family="ratio-model"] text {
@@ -99,6 +107,107 @@
 .math-graphic[data-graphic-family="counters"] circle[fill="#fff"] {
   fill: #fff;
   stroke: var(--gfx-ink);
+}
+
+/* Optical sizing: only block-level instructional graphics are enlarged.
+   Inline counters/answer symbols keep their compact pedagogical size. */
+.graph-container > .math-graphic[data-graphic-family="chart"] {
+  width: min(100%, 356px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto 5px;
+}
+.bar-chart-container > .math-graphic[data-graphic-family="chart"] {
+  width: min(100%, 390px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto 5px;
+}
+.number-line-container > .math-graphic[data-graphic-family="number-line"] {
+  width: min(100%, 410px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto;
+}
+.bags-illustration > .math-graphic[data-graphic-family="ratio-model"] {
+  width: min(100%, 385px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto;
+}
+.bracelet-row .math-graphic[data-graphic-family="counters"] {
+  max-width: 275px;
+}
+.geo-mini.math-graphic[data-graphic-family="geometry"] {
+  height: 58px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+.svg-figure-row .geo-item > .math-graphic[data-graphic-family="geometry"] {
+  height: 68px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* High-value individual diagrams that were visually undersized in the full-page review. */
+.math-graphic[aria-label^="משולש APB"] {
+  height: 195px !important;
+  width: auto !important;
+  max-width: 100%;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="משולש ישר-זווית: זווית ישרה"] {
+  width: 285px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="מלבן ומשולש, יחס שטח"] {
+  width: 185px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="משולש המחולק לשמונה"] {
+  width: 285px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="מלבן ABCD ברוחב 12"] {
+  width: 330px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="שתי זוויות צמודות"] {
+  width: 145px !important;
+  height: auto !important;
+}
+.math-graphic[aria-label^="מערכת צירים ובה משולשים דומים"] {
+  width: 350px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="טרפז ישר זווית"] {
+  width: 350px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="משולש ישר זווית ABC, זווית B ישרה, מלבן"] {
+  width: 270px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="מלבן ומשולש שווה־שוקיים"] {
+  width: 270px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
 }
 
 /* High-value parametric window/grid diagram.
@@ -131,7 +240,7 @@
   stroke-width: 0.9px;
 }
 
-/* Preserve crisp line hierarchy in print; never rely on shadows or raster effects. */
+/* Preserve crisp hierarchy in print and make chart categories distinguishable in grayscale. */
 @media print {
   .worksheet-page svg,
   .worksheet-page .math-graphic {
@@ -147,6 +256,11 @@
   .worksheet-page svg [stroke="#e2e2e2"] {
     stroke: #cbd5e1;
   }
+  .math-graphic[data-graphic-family="chart"] [fill="#5b9bd5"] { fill: #5f6f86; }
+  .math-graphic[data-graphic-family="chart"] [fill="#ed7d31"] { fill: #aeb8c5; }
+  .math-graphic[data-graphic-family="chart"] [fill="#a5a5a5"] { fill: #e4e8ee; }
+  .math-graphic[data-graphic-family="chart"] [fill="#555"] { fill: #4b5563; }
+  .math-graphic[data-graphic-family="chart"] [fill="#ccc"] { fill: #d1d5db; }
   .math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] {
     fill: #aeb4bd;
   }
