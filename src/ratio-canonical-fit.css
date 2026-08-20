@@ -98,10 +98,9 @@
   padding-bottom: 3px;
 }
 
-/* Graphic legibility fix without touching hash-locked source content: this one wide instructional
-   rectangle was inheriting the generic compact 100px wrapper, which made its labels too small.
-   The textbook reorders source questions into task fragments, so scope the presentation override
-   to the stable task key instead of the original source-page wrapper. */
-.textbook-task-fragment[data-task-key="ratio-page-29#4"] .geo-figure.compact {
+/* Graphic legibility fix without touching hash-locked source content. Textbook pagination clones
+   question content without preserving task-wrapper ancestry, so target the stable semantic SVG
+   itself and enlarge its compact geometry wrapper regardless of the page fragment it lands on. */
+.geo-figure.compact:has(> svg.geo-svg[aria-label^="מלבן ABCD שאורכו 6p ורוחבו 2p"]) {
   max-width: 160px;
 }
