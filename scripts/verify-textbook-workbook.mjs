@@ -11,6 +11,23 @@ fs.mkdirSync(outputDir, { recursive: true });
 const pagesDir = path.join(outputDir, 'pages');
 fs.mkdirSync(pagesDir, { recursive: true });
 
+function inspectPdf(buffer) {
+  const text = buffer.toString('latin1');
+  const explicitPageObjects = (text.match(/\/Type\s*\/Page\b/g) || []).length;
+  const declaredPageCounts = [...text.matchAll(/\/Type\s*\/Pages\b[\s\S]{0,320}?\/Count\s+(\d+)/g)]
+    .map((match) => Number(match[1]))
+    .filter((value) => Number.isInteger(value) && value > 0);
+  const declaredMax = declaredPageCounts.length > 0 ? Math.max(...declaredPageCounts) : 0;
+  return {
+    headerValid: text.startsWith('%PDF-'),
+    eofValid: text.includes('%%EOF'),
+    explicitPageObjects,
+    declaredMax,
+    pageCount: Math.max(explicitPageObjects, declaredMax),
+    bytes: buffer.length,
+  };
+}
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1200 }, deviceScaleFactor: 1 });
 const consoleErrors = [];
@@ -158,12 +175,19 @@ for (const metric of printMetrics) {
   if (metric.zoom !== '1' && metric.zoom !== 'normal') failures.push(`Print page ${metric.page}: zoom is ${metric.zoom}, expected 1.`);
 }
 
-await page.pdf({
-  path: path.join(outputDir, 'ratio-workbook-preview.pdf'),
+const pdfPath = path.join(outputDir, 'ratio-workbook-preview.pdf');
+const pdfBuffer = await page.pdf({
   printBackground: true,
   preferCSSPageSize: true,
   tagged: true,
 });
+fs.writeFileSync(pdfPath, pdfBuffer);
+const pdfAudit = inspectPdf(pdfBuffer);
+if (!pdfAudit.headerValid || !pdfAudit.eofValid) failures.push('Generated PDF is structurally incomplete.');
+if (pdfAudit.bytes < 10_000) failures.push(`Generated PDF is unexpectedly small (${pdfAudit.bytes} bytes).`);
+if (pdfAudit.pageCount !== audit.physical.length) {
+  failures.push(`Generated PDF page count mismatch: PDF=${pdfAudit.pageCount}, DOM=${audit.physical.length}.`);
+}
 
 const result = {
   generatedAt: new Date().toISOString(),
@@ -176,6 +200,10 @@ const result = {
   semanticPages: audit.meta?.semanticPageCount ?? null,
   taskUnits: audit.meta?.taskCount ?? null,
   physicalPages: audit.physical.length,
+  pdfPages: pdfAudit.pageCount,
+  pdfBytes: pdfAudit.bytes,
+  pdfExplicitPageObjects: pdfAudit.explicitPageObjects,
+  pdfDeclaredMaxPages: pdfAudit.declaredMax,
   teacherPages: audit.meta?.teacherPages ?? null,
   firstStudentPage: audit.meta?.firstStudentPage ?? null,
   sourceCommit: audit.meta?.sourceCommit ?? null,
