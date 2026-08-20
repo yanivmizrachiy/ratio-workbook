@@ -1,9 +1,9 @@
-name: Ratio Single Source Verify
+name: Ratio Workbook Verify
 
 on:
   push:
     branches:
-      - agent/single-source-migration-20260819
+      - agent/ratio-textbook-reorder-20260819
   pull_request:
     branches:
       - main
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ratio-single-source-${{ github.ref }}
+  group: ratio-workbook-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ratio-single-source-preview-${{ github.run_number }}
+          name: ratio-workbook-preview-${{ github.run_number }}
           path: |
             preview/full-workbook.html
             preview/full-workbook-artifact.html

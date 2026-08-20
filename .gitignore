@@ -2,5 +2,12 @@ node_modules/
 dist/
 preview/
 content-manifest.json
+full-workbook.html
+coverage/
+playwright-report/
+test-results/
+.vite/
+scripts/.generated-*.mjs
+*.tmp
 *.log
 .DS_Store
