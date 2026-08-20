@@ -1,15 +1,26 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
+const here = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(here, '..');
 const inputHtml = path.resolve(process.argv[2] || 'preview/full-workbook.html');
 const outputDir = path.resolve(process.argv[3] || 'preview/audit');
 
 if (!fs.existsSync(inputHtml)) throw new Error(`Preview HTML not found: ${inputHtml}`);
 fs.mkdirSync(outputDir, { recursive: true });
 const pagesDir = path.join(outputDir, 'pages');
+const graphicsDir = path.join(outputDir, 'graphics');
+const grayscaleDir = path.join(outputDir, 'grayscale');
 fs.mkdirSync(pagesDir, { recursive: true });
+fs.mkdirSync(graphicsDir, { recursive: true });
+fs.mkdirSync(grayscaleDir, { recursive: true });
+
+function sha256(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
 
 function inspectPdf(buffer) {
   const text = buffer.toString('latin1');
@@ -57,6 +68,50 @@ const audit = await page.evaluate(() => {
   const teacherHeadingCount = [...document.querySelectorAll('.page-header-title')]
     .filter((node) => node.textContent?.includes('למורה')).length;
 
+  const numericAttrs = ['x','y','x1','y1','x2','y2','cx','cy','r','rx','ry','width','height'];
+  const svgs = [...document.querySelectorAll('.wb-page svg')];
+  const graphicRows = svgs.map((svg, index) => {
+    const vb = svg.viewBox?.baseVal;
+    let invalidNumericAttributes = 0;
+    let invalidDimensions = 0;
+    const shapes = [...svg.querySelectorAll('line,rect,circle,ellipse,polygon,polyline,path,text')];
+    for (const shape of shapes) {
+      for (const attr of numericAttrs) {
+        if (!shape.hasAttribute(attr)) continue;
+        const raw = shape.getAttribute(attr) || '';
+        if (/NaN|Infinity/i.test(raw)) invalidNumericAttributes++;
+      }
+      if (shape.tagName.toLowerCase() === 'rect') {
+        const w = Number(shape.getAttribute('width'));
+        const h = Number(shape.getAttribute('height'));
+        if (Number.isFinite(w) && w <= 0) invalidDimensions++;
+        if (Number.isFinite(h) && h <= 0) invalidDimensions++;
+      }
+      if (shape.tagName.toLowerCase() === 'circle') {
+        const r = Number(shape.getAttribute('r'));
+        if (Number.isFinite(r) && r <= 0) invalidDimensions++;
+      }
+    }
+    const accessible = svg.getAttribute('aria-hidden') === 'true'
+      || Boolean(svg.getAttribute('aria-label'))
+      || Boolean(svg.querySelector('title')?.textContent?.trim());
+    return {
+      index: index + 1,
+      family: svg.getAttribute('data-graphic-family') || 'unclassified',
+      hasViewBox: svg.hasAttribute('viewBox') && Boolean(vb && vb.width > 0 && vb.height > 0),
+      preserveAspectRatio: svg.getAttribute('preserveAspectRatio') || '',
+      shapeRendering: svg.getAttribute('shape-rendering') || '',
+      textRendering: svg.getAttribute('text-rendering') || '',
+      accessible,
+      rasterImages: svg.querySelectorAll('image').length,
+      invalidNumericAttributes,
+      invalidDimensions,
+      shapeCount: shapes.length,
+    };
+  });
+  const familyCounts = {};
+  for (const row of graphicRows) familyCounts[row.family] = (familyCounts[row.family] || 0) + 1;
+
   const physical = pages.map((node, index) => {
     const body = node.querySelector('.wb-body');
     const rect = node.getBoundingClientRect();
@@ -80,16 +135,33 @@ const audit = await page.evaluate(() => {
       imagesWithoutAlt,
       taskKeys: groups.map((group) => group.getAttribute('data-task-key')).filter(Boolean),
       sourceKeys: [...new Set(groups.map((group) => group.getAttribute('data-source-key')).filter(Boolean))],
+      graphicFamilies: [...new Set([...node.querySelectorAll('svg[data-graphic-family]')]
+        .map((svg) => svg.getAttribute('data-graphic-family')).filter(Boolean))],
     };
   });
 
   return {
     htmlReady: document.documentElement.dataset.workbookReady === 'true',
     workbookError: document.documentElement.dataset.workbookError || null,
+    graphicsNormalized: document.documentElement.dataset.graphicsNormalized === 'true',
+    declaredGraphicsCount: Number(document.documentElement.dataset.graphicsCount || 0),
     declaredTaskCount: Number(document.documentElement.dataset.taskCount || 0),
     meta,
     teacherMarkers,
     teacherHeadingCount,
+    graphics: {
+      total: graphicRows.length,
+      missingViewBox: graphicRows.filter((row) => !row.hasViewBox).length,
+      missingPreserveAspectRatio: graphicRows.filter((row) => row.preserveAspectRatio !== 'xMidYMid meet').length,
+      missingPrecision: graphicRows.filter((row) => row.shapeRendering !== 'geometricPrecision' || row.textRendering !== 'geometricPrecision').length,
+      inaccessible: graphicRows.filter((row) => !row.accessible).length,
+      rasterImages: graphicRows.reduce((sum, row) => sum + row.rasterImages, 0),
+      invalidNumericAttributes: graphicRows.reduce((sum, row) => sum + row.invalidNumericAttributes, 0),
+      invalidDimensions: graphicRows.reduce((sum, row) => sum + row.invalidDimensions, 0),
+      canvas: document.querySelectorAll('.wb-page canvas').length,
+      familyCounts,
+      rows: graphicRows,
+    },
     physical,
   };
 });
@@ -106,6 +178,17 @@ if (!Number.isInteger(audit.meta?.semanticPageCount) || audit.meta.semanticPageC
 if (!Number.isInteger(audit.meta?.taskCount) || audit.meta.taskCount <= 0) failures.push('Invalid taskCount.');
 if (!Array.isArray(audit.meta?.taskSequence) || audit.meta.taskSequence.length !== audit.meta?.taskCount) failures.push('Invalid taskSequence metadata.');
 if (!Array.isArray(audit.meta?.textbookChapterOrder) || audit.meta.textbookChapterOrder.length === 0) failures.push('Invalid textbookChapterOrder metadata.');
+
+if (!audit.graphicsNormalized) failures.push('Mathematical graphics normalizer did not run.');
+if (audit.graphics.total !== audit.declaredGraphicsCount) failures.push(`Graphics count mismatch: DOM=${audit.graphics.total}, declared=${audit.declaredGraphicsCount}.`);
+if (audit.graphics.missingViewBox > 0) failures.push(`Found ${audit.graphics.missingViewBox} rendered SVG(s) without a valid viewBox.`);
+if (audit.graphics.missingPreserveAspectRatio > 0) failures.push(`Found ${audit.graphics.missingPreserveAspectRatio} rendered SVG(s) without canonical preserveAspectRatio.`);
+if (audit.graphics.missingPrecision > 0) failures.push(`Found ${audit.graphics.missingPrecision} rendered SVG(s) without geometric/text precision.`);
+if (audit.graphics.inaccessible > 0) failures.push(`Found ${audit.graphics.inaccessible} rendered SVG(s) without aria-hidden or an accessible name.`);
+if (audit.graphics.rasterImages > 0) failures.push(`Found ${audit.graphics.rasterImages} raster <image> node(s) inside mathematical SVG.`);
+if (audit.graphics.canvas > 0) failures.push(`Found ${audit.graphics.canvas} canvas element(s) in workbook output.`);
+if (audit.graphics.invalidNumericAttributes > 0) failures.push(`Found ${audit.graphics.invalidNumericAttributes} invalid SVG numeric attribute(s).`);
+if (audit.graphics.invalidDimensions > 0) failures.push(`Found ${audit.graphics.invalidDimensions} non-positive SVG dimension(s).`);
 
 const displayedNumbers = audit.physical.map((item) => item.displayedNumber);
 const expectedNumbers = Array.from({ length: audit.physical.length }, (_, index) => index + 1);
@@ -160,6 +243,35 @@ for (let index = 0; index < audit.physical.length; index++) {
   });
 }
 
+const representativeHashes = {};
+const families = Object.keys(audit.graphics.familyCounts).sort();
+await page.addStyleTag({ content: '.audit-grayscale .math-graphic{filter:grayscale(1)!important}' });
+for (const family of families) {
+  const locator = page.locator(`svg.math-graphic[data-graphic-family="${family}"]`).first();
+  if (await locator.count() === 0) continue;
+  const colorPath = path.join(graphicsDir, `${family}.png`);
+  const colorBuffer = await locator.screenshot({ path: colorPath, animations: 'disabled' });
+  representativeHashes[family] = sha256(colorBuffer);
+  await page.evaluate(() => document.documentElement.classList.add('audit-grayscale'));
+  await locator.screenshot({ path: path.join(grayscaleDir, `${family}.png`), animations: 'disabled' });
+  await page.evaluate(() => document.documentElement.classList.remove('audit-grayscale'));
+}
+
+const goldenPath = path.join(projectRoot, 'src', 'data', 'graphicsGoldenHashes.json');
+const goldenCandidate = { schemaVersion: 1, families: representativeHashes };
+fs.writeFileSync(path.join(outputDir, 'graphics-golden-candidate.json'), `${JSON.stringify(goldenCandidate, null, 2)}\n`, 'utf8');
+if (fs.existsSync(goldenPath)) {
+  const golden = JSON.parse(fs.readFileSync(goldenPath, 'utf8'));
+  const expectedFamilies = golden?.families || {};
+  if (JSON.stringify(Object.keys(expectedFamilies).sort()) !== JSON.stringify(Object.keys(representativeHashes).sort())) {
+    failures.push('Graphics golden family set changed; review and explicitly update graphicsGoldenHashes.json.');
+  } else {
+    for (const family of Object.keys(expectedFamilies)) {
+      if (expectedFamilies[family] !== representativeHashes[family]) failures.push(`Visual regression in graphics family: ${family}.`);
+    }
+  }
+}
+
 await page.setViewportSize({ width: 390, height: 844 });
 await page.emulateMedia({ media: 'screen' });
 await page.evaluate(() => window.dispatchEvent(new Event('resize')));
@@ -212,6 +324,8 @@ const result = {
   taskSequenceSha256: audit.meta?.taskSequenceSha256 ?? null,
   contentSha256: audit.meta?.contentSha256 ?? null,
   chapterOrder: audit.meta?.textbookChapterOrder ?? null,
+  graphics: audit.graphics,
+  graphicRepresentativeHashes: representativeHashes,
   renderedTaskKeys,
   pages: audit.physical,
 };
