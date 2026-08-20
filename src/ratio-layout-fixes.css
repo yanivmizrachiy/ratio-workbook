@@ -180,7 +180,7 @@
   margin: 0 auto;
 }
 
-.ratio-page-29 .geo-figure.compact .geo-svg {
+.ratio-page-29 .geo-figure.compact .geo-svg[aria-label^="משולש ישר זווית ABC, הזווית ב־B ישרה"] {
   width: auto;
   max-width: 100%;
   max-height: 88px;
