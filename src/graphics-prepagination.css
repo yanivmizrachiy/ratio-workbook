@@ -1,0 +1,124 @@
+/* Pre-pagination optical sizing.
+   These layout-only rules intentionally match the final math-graphic sizes before
+   runtime normalization, so A4 pagination measures the exact final geometry.
+   Do not put visual styling here; graphics-system.css remains the canonical visual layer. */
+
+.graph-container > svg {
+  width: min(100%, 356px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto 5px;
+}
+
+.bar-chart-container > svg {
+  width: min(100%, 390px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto 5px;
+}
+
+.number-line-container > svg {
+  width: min(100%, 410px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto;
+}
+
+.bags-illustration > svg {
+  width: min(100%, 385px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto;
+}
+
+.bracelet-row svg {
+  max-width: 275px;
+}
+
+.geo-mini {
+  height: 58px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+
+.svg-figure-row .geo-item > svg {
+  height: 68px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+
+svg[aria-label^="משולש APB"] {
+  height: 195px !important;
+  width: auto !important;
+  max-width: 100%;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="משולש ישר-זווית: זווית ישרה"] {
+  width: 285px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="מלבן ומשולש, יחס שטח"] {
+  width: 185px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="משולש המחולק לשמונה"] {
+  width: 285px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="מלבן ABCD ברוחב 12"] {
+  width: 330px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="שתי זוויות צמודות"] {
+  width: 145px !important;
+  height: auto !important;
+}
+
+svg[aria-label^="מערכת צירים ובה משולשים דומים"] {
+  width: 350px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="טרפז ישר זווית"] {
+  width: 350px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="משולש ישר זווית ABC, זווית B ישרה, מלבן"] {
+  width: 270px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="מלבן ומשולש שווה־שוקיים"] {
+  width: 270px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+svg[aria-label^="חלון ריבועי"] {
+  width: 235px !important;
+  height: 235px !important;
+  display: block !important;
+  margin: 2px auto 5px;
+}
