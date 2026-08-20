@@ -100,7 +100,8 @@
 
 /* Graphic legibility fix without touching hash-locked source content: this one wide instructional
    rectangle was inheriting the generic compact 100px wrapper, which made its labels too small.
-   Keep the same SVG geometry/content and only restore the normal geometry optical width. */
-.ratio-source-page-29 .geo-figure.compact:has(svg[aria-label^="מלבן ABCD שאורכו 6p"]) {
+   The textbook reorders source questions into task fragments, so scope the presentation override
+   to the stable task key instead of the original source-page wrapper. */
+.textbook-task-fragment[data-task-key="ratio-page-29#4"] .geo-figure.compact {
   max-width: 160px;
 }
