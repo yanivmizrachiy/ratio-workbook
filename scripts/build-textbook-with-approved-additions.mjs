@@ -16,6 +16,98 @@ function replaceOnce(find, replacement, label) {
 }
 
 replaceOnce(
+  "function readEmbeddedRubikCss() {",
+  `const APPROVED_PERSON_NAME_REPLACEMENTS = [
+  ['משפחת תמיר', 'משפחת הראל'],
+  ['משפחת סביון', 'משפחת גלעד'],
+  ['משפחת ארז', 'משפחת אריאל'],
+  ['משפחת פרץ', 'משפחת יונתן'],
+  ['נֹגַה', 'אורנית'],
+  ['בָּר', 'אריאל'],
+  ['יהודית', 'סבתא אתי'],
+  ['מרים', 'סבתא רבקה'],
+  ['דניאל', 'אריאל'],
+  ['עמיחי', 'גלעד'],
+  ['אלעד', 'יונתן'],
+  ['איילת', 'אורנית'],
+  ['נורית', 'צצונה'],
+  ['שרית', 'אורנית'],
+  ['רונן', 'יונתן'],
+  ['מירב', 'מאיה'],
+  ['נעמה', 'מאיה'],
+  ['עדינה', 'תמר'],
+  ['נעמי', 'מאיה'],
+  ['עודד', 'הראל'],
+  ['רינת', 'אורנית'],
+  ['רותי', 'מאיה'],
+  ['נועם', 'רותם'],
+  ['מירי', 'תמר'],
+  ['דינה', 'מאיה'],
+  ['גדי', 'גלעד'],
+  ['יאיר', 'הראל'],
+  ['נועה', 'מאיה'],
+  ['ירון', 'אריאל'],
+  ['יוסי', 'יונתן'],
+  ['יוני', 'איתי'],
+  ['סימה', 'סבתא אתי'],
+  ['שושי', 'סבתא רבקה'],
+  ['טלי', 'תמר'],
+  ['קרן', 'אורנית'],
+  ['ענת', 'תמר'],
+  ['יפה', 'תמר'],
+  ['חיים', 'סבא שלמה'],
+  ['משה', 'סבא שמעון'],
+  ['אורי', 'הראל'],
+  ['רפי', 'גלעד'],
+  ['אלי', 'איתי'],
+  ['דני', 'גלעד'],
+  ['רנ', 'איתי'],
+  ['רן', 'איתי'],
+  ['עידן', 'אריאל'],
+  ['טל', 'רותם'],
+  ['דן', 'איתי'],
+];
+
+const APPROVED_CONTEXT_REPLACEMENTS = [
+  ['בני משתמש', 'איתי משתמש'],
+];
+
+const LEGACY_PERSON_NAME_GUARDS = APPROVED_PERSON_NAME_REPLACEMENTS.map(([from]) => from);
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^\\${}()|[\\]\\\\]/g, '\\\\$&');
+}
+
+function replacePersonToken(html, from, to) {
+  if (from.includes(' ') || /[\\u0591-\\u05C7]/.test(from)) return html.split(from).join(to);
+  const pattern = new RegExp('(?<![א-ת])([ובלמשכה]{0,2})' + escapeRegExp(from) + '(?![א-ת])', 'g');
+  return html.replace(pattern, (_match, prefix) => prefix + to);
+}
+
+function applyApprovedPersonNames(html) {
+  let result = html;
+  for (const [from, to] of APPROVED_CONTEXT_REPLACEMENTS) result = result.split(from).join(to);
+  for (const [from, to] of APPROVED_PERSON_NAME_REPLACEMENTS) result = replacePersonToken(result, from, to);
+  return result;
+}
+
+function hasLegacyPersonName(html, name) {
+  if (name.includes(' ') || /[\\u0591-\\u05C7]/.test(name)) return html.includes(name);
+  const pattern = new RegExp('(?<![א-ת])([ובלמשכה]{0,2})' + escapeRegExp(name) + '(?![א-ת])');
+  return pattern.test(html);
+}
+
+function assertNoLegacyPersonNames(html) {
+  const leftovers = LEGACY_PERSON_NAME_GUARDS.filter((name) => hasLegacyPersonName(html, name));
+  if (html.includes('בני משתמש')) leftovers.push('בני משתמש');
+  if (leftovers.length) throw new Error('Legacy person names remain after approved-name transform: ' + [...new Set(leftovers)].join(', '));
+}
+
+function readEmbeddedRubikCss() {`,
+  'approved person-name transform',
+);
+
+replaceOnce(
   "let sourceWorkbookSha256 = '';",
   "let sourceWorkbookSha256 = '';\nlet approvedAdditionsSha256 = '';",
   'build state',
@@ -34,20 +126,32 @@ replaceOnce(
 );
 
 replaceOnce(
+  "    const inner = markup.slice(markerIndex + marker.length).replace(/<\\/div><\\/div>$/, '');\n    const contentSha = sha256(inner);",
+  "    const inner = markup.slice(markerIndex + marker.length).replace(/<\\/div><\\/div>$/, '');\n    const approvedInner = applyApprovedPersonNames(inner);\n    const contentSha = sha256(approvedInner);",
+  'source approved-name transform',
+);
+
+replaceOnce(
+  "    srcHtml += `<div class=\"wb-srcpage\" data-key=\"${page.key}\" data-source-page=\"${page.id}\">${inner}</div>`;",
+  "    srcHtml += `<div class=\"wb-srcpage\" data-key=\"${page.key}\" data-source-page=\"${page.id}\">${approvedInner}</div>`;",
+  'source approved-name output',
+);
+
+replaceOnce(
   "  if (sourceWorkbookSha256 !== expectedWorkbookSha) {\n    throw new Error(`Locked source workbook hash changed: expected ${expectedWorkbookSha}, got ${sourceWorkbookSha256}.`);\n  }",
-  `  if (sourceWorkbookSha256 !== expectedWorkbookSha) {\n    throw new Error(\`Locked source workbook hash changed: expected \${expectedWorkbookSha}, got \${sourceWorkbookSha256}.\`);\n  }\n\n  const additionHashes = [];\n  for (const addition of approvedAdditionPages) {\n    if (!addition?.key || typeof addition.component !== 'function') throw new Error('Invalid approved proportion addition definition.');\n    const markup = renderToStaticMarkup(React.createElement(React.Fragment, null, addition.component()));\n    if (markup.includes('teacher-intro-page') || markup.includes('יחס · למורה')) {\n      throw new Error(\`Teacher-only markup leaked into approved addition \${addition.key}.\`);\n    }\n    const markerIndex = markup.indexOf(marker);\n    if (markerIndex === -1) throw new Error(\`Approved addition \${addition.key} has no .page-content element.\`);\n    const inner = markup.slice(markerIndex + marker.length).replace(/<\\/div><\\/div>$/, '');\n    const markupSha = sha256(markup);\n    additionHashes.push(\`\${addition.key}:\${markupSha}\`);\n    srcHtml += \`<div class=\"wb-addpage\" data-key=\"\${addition.key}\" data-source-page=\"approved-addition\">\${inner}</div>\`;\n  }\n  approvedAdditionsSha256 = sha256(additionHashes.join('\\n'));`,
+  `  if (sourceWorkbookSha256 !== expectedWorkbookSha) {\n    throw new Error(\`Locked source workbook hash changed: expected \${expectedWorkbookSha}, got \${sourceWorkbookSha256}.\`);\n  }\n\n  const additionHashes = [];\n  for (const addition of approvedAdditionPages) {\n    if (!addition?.key || typeof addition.component !== 'function') throw new Error('Invalid approved proportion addition definition.');\n    const markup = renderToStaticMarkup(React.createElement(React.Fragment, null, addition.component()));\n    if (markup.includes('teacher-intro-page') || markup.includes('יחס · למורה')) {\n      throw new Error(\`Teacher-only markup leaked into approved addition \${addition.key}.\`);\n    }\n    const markerIndex = markup.indexOf(marker);\n    if (markerIndex === -1) throw new Error(\`Approved addition \${addition.key} has no .page-content element.\`);\n    const inner = markup.slice(markerIndex + marker.length).replace(/<\\/div><\\/div>$/, '');\n    const approvedInner = applyApprovedPersonNames(inner);\n    const markupSha = sha256(markup);\n    additionHashes.push(\`\${addition.key}:\${markupSha}\`);\n    srcHtml += \`<div class=\"wb-addpage\" data-key=\"\${addition.key}\" data-source-page=\"approved-addition\">\${approvedInner}</div>\`;\n  }\n  approvedAdditionsSha256 = sha256(additionHashes.join('\\n'));\n  assertNoLegacyPersonNames(srcHtml);`,
   'locked workbook check',
 );
 
 replaceOnce(
   "const contentSha256 = sha256(`${sourceWorkbookSha256}\\n${taskSequenceSha256}`);",
-  "const contentSha256 = sha256(`${sourceWorkbookSha256}\\n${approvedAdditionsSha256}\\n${taskSequenceSha256}`);",
+  "const renderedWorkbookSha256 = sha256(srcHtml);\nconst contentSha256 = sha256(`${sourceWorkbookSha256}\\n${approvedAdditionsSha256}\\n${taskSequenceSha256}\\n${renderedWorkbookSha256}`);",
   'content hash',
 );
 
 replaceOnce(
   "  taskCount: textbookTaskSequence.length,",
-  "  taskCount: textbookTaskSequence.length,\n  approvedAdditionPages: 8,\n  approvedAdditionsSha256,",
+  "  taskCount: textbookTaskSequence.length,\n  approvedAdditionPages: 8,\n  approvedAdditionsSha256,\n  renderedWorkbookSha256,",
   'build metadata',
 );
 
