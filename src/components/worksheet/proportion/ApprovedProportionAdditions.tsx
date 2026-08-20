@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { PageLayout } from '../pages/PageLayout';
+import { PageLayout, WorkArea } from '../pages/PageLayout';
 import {
   TextbookActivityTitle,
   TextbookAnswerBox,
@@ -151,6 +151,21 @@ function Question8() {
   );
 }
 
+function ProportionalRatiosPractice() {
+  return (
+    <ProportionPage pageNumber={909}>
+      <p><strong>כתבו יחסים פרופורציוניים ליחסים הבאים.</strong></p>
+      <Row spread>
+        <span>א. <bdi dir="ltr">4:12</bdi></span>
+        <span>ב. <bdi dir="ltr">15:6</bdi></span>
+        <span>ג. <bdi dir="ltr">4:32</bdi></span>
+        <span>ד. <bdi dir="ltr">0.2:0.6</bdi></span>
+      </Row>
+      <WorkArea lines={7} />
+    </ProportionPage>
+  );
+}
+
 export const APPROVED_PROPORTION_ADDITION_PAGES = [
   { key: 'prop-addition-01', title: 'פרופורציה — פתיחה', component: () => <IntroActivity /> },
   { key: 'prop-addition-02', title: 'פרופורציה — שאלה 2', component: () => <Question2 /> },
@@ -160,4 +175,5 @@ export const APPROVED_PROPORTION_ADDITION_PAGES = [
   { key: 'prop-addition-06', title: 'פרופורציה — שאלה 6', component: () => <Question6 /> },
   { key: 'prop-addition-07', title: 'פרופורציה — שאלה 7', component: () => <Question7 /> },
   { key: 'prop-addition-08', title: 'פרופורציה — שאלה 8', component: () => <Question8 /> },
+  { key: 'prop-addition-09', title: 'פרופורציה — יחסים פרופורציוניים', component: () => <ProportionalRatiosPractice /> },
 ] as const;
