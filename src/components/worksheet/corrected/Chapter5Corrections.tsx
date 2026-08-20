@@ -59,7 +59,7 @@ function RectangleChallenge() {
         <line x1="120" y1="20" x2="20" y2="80" stroke="#1e40af" strokeWidth="1.2" />
         <line x1="120" y1="20" x2="220" y2="80" stroke="#1e40af" strokeWidth="1.2" />
         <line x1="120" y1="20" x2="120" y2="80" stroke="#1e40af" strokeWidth="1.2" />
-        <text x="10" y="18">A</text><text x="225" y="18">B</text><text x="225" y="94">C</text><text x="10" y="94">D</text><text x="116" y="15">E</text><text x="116" y="95">F</text>
+        <text x="10" y="18">A</text><text x="225" y="18">B</text><text x="225" y="94">C</text><text x="10" y="94">D</text><text x="124" y="35">E</text><text x="116" y="95">F</text>
         <text x="120" y="12" textAnchor="middle" direction="ltr">6p</text><text x="228" y="54" direction="ltr">2p</text><text x="170" y="94" direction="ltr">3p</text>
       </svg>
     </div>
