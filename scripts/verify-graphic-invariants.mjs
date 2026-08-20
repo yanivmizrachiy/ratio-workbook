@@ -29,9 +29,11 @@ try {
     let labelsOutside = 0;
     let textCollisions = 0;
     let primitiveOutside = 0;
+    let namedSegmentMeasurementLabels = 0;
     const labelOutsideDetails = [];
     const collisionDetails = [];
     const undersizedInstructional = [];
+    const namedSegmentMeasurementDetails = [];
 
     const overlapRatio = (a, b) => {
       const left = Math.max(a.left, b.left);
@@ -179,6 +181,16 @@ try {
       if (!(rendered.width > 0 && rendered.height > 0)) failures.push(`Geometry ${index + 1} has zero rendered size.`);
       const rightAngles = [...svg.querySelectorAll('rect')].filter((r) => Number(r.getAttribute('width')) <= 15 && Number(r.getAttribute('height')) <= 15);
       if (rightAngles.some((r) => !(Number(r.getAttribute('width')) > 0 && Number(r.getAttribute('height')) > 0))) failures.push(`Geometry ${index + 1} contains invalid right-angle marker.`);
+      for (const text of svg.querySelectorAll('text')) {
+        const value = (text.textContent || '').trim();
+        if (/^[A-Z]{2}\s*=\s*\S+/.test(value)) {
+          namedSegmentMeasurementLabels += 1;
+          namedSegmentMeasurementDetails.push({ geometry: index + 1, text: value, ariaLabel: (svg.getAttribute('aria-label') || '').slice(0, 100) });
+        }
+      }
+    }
+    if (namedSegmentMeasurementLabels) {
+      failures.push(`${namedSegmentMeasurementLabels} geometry measurement label(s) include a segment name instead of value-only notation: ${JSON.stringify(namedSegmentMeasurementDetails)}.`);
     }
 
     return {
@@ -196,6 +208,8 @@ try {
       collisionDetails,
       primitiveOutside,
       undersizedInstructional,
+      namedSegmentMeasurementLabels,
+      namedSegmentMeasurementDetails,
       windowDiagramChecked: Boolean(windowSvg),
       chartCount: charts.length,
       gridCount: grids.length,
