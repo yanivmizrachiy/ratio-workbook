@@ -1,196 +1,153 @@
 import { ReactNode } from 'react';
 import { PageLayout } from '../pages/PageLayout';
+import {
+  TextbookActivityTitle,
+  TextbookAnswerBox,
+  TextbookDownArrow,
+  TextbookFraction,
+  TextbookQuestionTitle,
+  TextbookRatioAnswer,
+  TextbookSelect,
+} from '../TextbookPrimitives';
 
 const CHAPTER = '7 · פרופורציה';
 const TOPIC = 'פרופורציה';
-const ACCENT = '#1f2a44';
-const BORDER = '#9fb0c8';
 
-function Box({ width = 58 }: { width?: number }) {
-  return <span aria-hidden="true" style={{ display: 'inline-block', width, height: 31, border: `1px solid ${BORDER}`, verticalAlign: 'middle', background: '#fff' }} />;
-}
-
-function Fraction({ num, den }: { num: ReactNode; den: ReactNode }) {
+function ProportionPage({ pageNumber, children }: { pageNumber: number; children: ReactNode }) {
   return (
-    <span dir="ltr" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'stretch', minWidth: 64, verticalAlign: 'middle', marginInline: 8 }}>
-      <span style={{ minHeight: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21 }}>{num}</span>
-      <span style={{ borderTop: `1.5px solid ${ACCENT}` }} />
-      <span style={{ minHeight: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21 }}>{den}</span>
-    </span>
+    <PageLayout pageNumber={pageNumber} chapter={CHAPTER} topic={TOPIC} className="approved-proportion-page">
+      <div className="approved-proportion-content">{children}</div>
+    </PageLayout>
   );
 }
 
-function FractionBoxes({ num, den }: { num?: ReactNode; den?: ReactNode }) {
-  return <Fraction num={num ?? <Box />} den={den ?? <Box />} />;
+function Row({ children, center = false, spread = false }: { children: ReactNode; center?: boolean; spread?: boolean }) {
+  const className = [
+    'approved-proportion-row',
+    center ? 'approved-proportion-row--center' : '',
+    spread ? 'approved-proportion-row--spread' : '',
+  ].filter(Boolean).join(' ');
+  return <div className={className}>{children}</div>;
 }
-
-function RatioBoxes() {
-  return (
-    <span dir="ltr" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, verticalAlign: 'middle', marginInline: 8 }}>
-      <Box /><span style={{ fontSize: 24 }}>:</span><Box />
-    </span>
-  );
-}
-
-function Choice({ options = [] }: { options?: string[] }) {
-  return (
-    <select defaultValue="" aria-label="בחירה" style={{ minWidth: 132, height: 34, border: `1px solid ${BORDER}`, background: '#fff', font: 'inherit', marginInline: 6 }}>
-      <option value="" disabled></option>
-      {options.map((option) => <option key={option} value={option}>{option}</option>)}
-    </select>
-  );
-}
-
-function Arrow() {
-  return <div aria-hidden="true" style={{ fontSize: 34, lineHeight: 1, textAlign: 'center', margin: '6px 0' }}>↓</div>;
-}
-
-function ActivityTitle({ children }: { children: ReactNode }) {
-  return <div style={{ fontSize: 28, fontWeight: 700, color: ACCENT, marginBottom: 20 }}>{children}</div>;
-}
-
-function QuestionTitle({ n }: { n: number }) {
-  return <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 24 }}><strong style={{ fontSize: 26 }}>שאלה {n}</strong><span style={{ color: '#7d8a97', fontSize: 15 }}>(12.5 נקודות)</span></div>;
-}
-
-const text = { fontSize: 20, lineHeight: 1.65 } as const;
-const centered = { ...text, textAlign: 'center' as const };
-const row = { ...text, display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: 7 };
 
 function IntroActivity() {
   return (
-    <PageLayout pageNumber={901} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 20 }}>
-        <ActivityTitle>פרופורציה=שוויון בין יחסים</ActivityTitle>
-        <p>שכבת ח' האלופה יצאה לטיול שנתי.</p>
-        <p>בכיתה ח'1 על כל 10 תלמידים יש מורה מבוגר מלווה.</p>
-        <div style={row}>השלימו: בכיתה ח'1 יצאו פי 10 <Choice options={['תלמידים', 'מורים']} /> מאשר <Choice options={['תלמידים', 'מורים']} /></div>
-        <div style={row}>היחס בין המורים לתלמידים הוא: <FractionBoxes /> <span>(אפשר לכתוב גם:</span><RatioBoxes /><span>)</span></div>
-        <div style={{ height: 12 }} />
-        <p>בכיתה ח'2 יצאו לטיול 30 תלמידים ו - 3 מבוגרים</p>
-        <div style={row}>היחס בין המבוגרים לתלמידים בכיתה ח'2 הוא: <FractionBoxes num={3} /></div>
-        <Arrow />
-        <div style={{ ...row, justifyContent: 'center' }}><FractionBoxes /><strong style={{ color: ACCENT }}>יחס מצומצם</strong></div>
-        <div style={{ height: 6 }} />
-        <div style={row}><strong style={{ color: ACCENT }}>מסקנה:</strong> גם בכיתה ח'1 וגם בכיתה ח'2 היחס בין המבוגרים לילדים הוא 1 ל - <Box /></div>
-        <div style={row}>היחס בין המבוגרים לילדים בשתי הכיתות הוא: <Choice /></div>
-        <p>לכן יש פרופורציה בין היחסים.</p>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={901}>
+      <TextbookActivityTitle>פרופורציה=שוויון בין יחסים</TextbookActivityTitle>
+      <p>שכבת ח' האלופה יצאה לטיול שנתי.</p>
+      <p>בכיתה ח'1 על כל 10 תלמידים יש מורה מבוגר מלווה.</p>
+      <Row>השלימו: בכיתה ח'1 יצאו פי 10 <TextbookSelect options={['תלמידים', 'מורים']} /> מאשר <TextbookSelect options={['תלמידים', 'מורים']} /></Row>
+      <Row>היחס בין המורים לתלמידים הוא: <TextbookFraction /> <span>(אפשר לכתוב גם:</span><TextbookRatioAnswer /><span>)</span></Row>
+      <div className="approved-proportion-spacer--sm" />
+      <p>בכיתה ח'2 יצאו לטיול 30 תלמידים ו - 3 מבוגרים</p>
+      <Row>היחס בין המבוגרים לתלמידים בכיתה ח'2 הוא: <TextbookFraction numerator={3} /></Row>
+      <TextbookDownArrow />
+      <Row center><TextbookFraction /><strong className="approved-proportion-label">יחס מצומצם</strong></Row>
+      <div className="approved-proportion-spacer--sm" />
+      <Row><strong className="approved-proportion-label">מסקנה:</strong> גם בכיתה ח'1 וגם בכיתה ח'2 היחס בין המבוגרים לילדים הוא 1 ל - <TextbookAnswerBox /></Row>
+      <Row>היחס בין המבוגרים לילדים בשתי הכיתות הוא: <TextbookSelect /></Row>
+      <p>לכן יש פרופורציה בין היחסים.</p>
+    </ProportionPage>
   );
 }
 
 function Question2() {
   return (
-    <PageLayout pageNumber={902} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 22 }}>
-        <QuestionTitle n={2} />
-        <div style={row}>איך כותבים את היחס בין 8 ל 80?<Choice /></div>
-        <div style={row}>היחס 2:20 הוא היחס בין <Choice /> ל - <Choice /></div>
-        <p>איך בודקים את היחסים הם שווים ? בואו נצמצם!</p>
-        <div style={{ ...row, justifyContent: 'space-around' }}><span><Fraction num={2} den={20} /> = <FractionBoxes /></span><span><Fraction num={8} den={80} /> = <FractionBoxes /></span></div>
-        <div style={row}>קיבלנו שלאחר צמצום היחסים <Choice /> ולכן <Choice /> ביניהם פרופורציה.</div>
-        <ActivityTitle>אם יחסים שווים אז אומרים שהם פרופורציוניים</ActivityTitle>
-        <div style={row}>אם יחסים <strong>לא שווים</strong> אז הם <Choice options={['פרופורציוניים', 'לא פרופורציוניים']} /></div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={902}>
+      <TextbookQuestionTitle n={2} />
+      <Row>איך כותבים את היחס בין 8 ל 80?<TextbookSelect /></Row>
+      <Row>היחס 2:20 הוא היחס בין <TextbookSelect /> ל - <TextbookSelect /></Row>
+      <p>איך בודקים את היחסים הם שווים ? בואו נצמצם!</p>
+      <Row spread><span><TextbookFraction numerator={2} denominator={20} /> = <TextbookFraction /></span><span><TextbookFraction numerator={8} denominator={80} /> = <TextbookFraction /></span></Row>
+      <Row>קיבלנו שלאחר צמצום היחסים <TextbookSelect /> ולכן <TextbookSelect /> ביניהם פרופורציה.</Row>
+      <TextbookActivityTitle>אם יחסים שווים אז אומרים שהם פרופורציוניים</TextbookActivityTitle>
+      <Row>אם יחסים <strong>לא שווים</strong> אז הם <TextbookSelect options={['פרופורציוניים', 'לא פרופורציוניים']} /></Row>
+    </ProportionPage>
   );
 }
 
 function Question3() {
   return (
-    <PageLayout pageNumber={903} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 24 }}>
-        <QuestionTitle n={3} />
-        <p><strong>המחיר של 3 עטים הוא 27 שקלים. המחיר של 5 עטים הוא 45 שקלים</strong></p>
-        <p>האם היחס <strong>3:27</strong> שווה ליחס <strong>5:45</strong>?</p>
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', textAlign: 'center' }}>
-          <div><strong style={{ fontSize: 32 }}>3:27</strong><Arrow /><RatioBoxes /></div>
-          <div><strong style={{ fontSize: 32 }}>5:45</strong><Arrow /><RatioBoxes /></div>
-        </div>
-        <div style={row}>היחסים המצומצמים <Choice /> ולכן <Choice /> פרופורציה</div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={903}>
+      <TextbookQuestionTitle n={3} />
+      <p><strong>המחיר של 3 עטים הוא 27 שקלים. המחיר של 5 עטים הוא 45 שקלים</strong></p>
+      <p>האם היחס <strong>3:27</strong> שווה ליחס <strong>5:45</strong>?</p>
+      <Row spread>
+        <div className="approved-proportion-pair"><strong className="approved-proportion-emphasis">3:27</strong><TextbookDownArrow /><TextbookRatioAnswer /></div>
+        <div className="approved-proportion-pair"><strong className="approved-proportion-emphasis">5:45</strong><TextbookDownArrow /><TextbookRatioAnswer /></div>
+      </Row>
+      <Row>היחסים המצומצמים <TextbookSelect /> ולכן <TextbookSelect /> פרופורציה</Row>
+    </ProportionPage>
   );
 }
 
 function Question4() {
   return (
-    <PageLayout pageNumber={904} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 24 }}>
-        <QuestionTitle n={4} />
-        <p><strong>מכונית עוברת 120 ק"מ במשך 2 שעות</strong></p>
-        <p><strong>רכבת עוברת 240 ק"מ במשך 3 שעות</strong></p>
-        <p><strong>מה היחס בין המרחק של הנסיעה לבין זמן הנסיעה?</strong></p>
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', textAlign: 'center' }}>
-          <div><div style={{ fontWeight: 600, marginBottom: 8 }}>רכבת</div><Arrow /><span><FractionBoxes /> = <FractionBoxes /></span></div>
-          <div><div style={{ fontWeight: 600, marginBottom: 8 }}>מכונית</div><Arrow /><span><FractionBoxes /> = <FractionBoxes /></span></div>
-        </div>
-        <div style={row}>היחסים <Choice /> ולכן <Choice /> ביניהם פרופורציה.</div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={904}>
+      <TextbookQuestionTitle n={4} />
+      <p><strong>מכונית עוברת 120 ק"מ במשך 2 שעות</strong></p>
+      <p><strong>רכבת עוברת 240 ק"מ במשך 3 שעות</strong></p>
+      <p><strong>מה היחס בין המרחק של הנסיעה לבין זמן הנסיעה?</strong></p>
+      <Row spread>
+        <div className="approved-proportion-pair"><div className="approved-proportion-pair-title">רכבת</div><TextbookDownArrow /><span><TextbookFraction /> = <TextbookFraction /></span></div>
+        <div className="approved-proportion-pair"><div className="approved-proportion-pair-title">מכונית</div><TextbookDownArrow /><span><TextbookFraction /> = <TextbookFraction /></span></div>
+      </Row>
+      <Row>היחסים <TextbookSelect /> ולכן <TextbookSelect /> ביניהם פרופורציה.</Row>
+    </ProportionPage>
   );
 }
 
 function HowToWrite() {
   return (
-    <PageLayout pageNumber={905} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 22 }}>
-        <ActivityTitle>איך כותבים?</ActivityTitle>
-        <div style={row}><strong>היחס בין 5 ל - 10</strong> : נכתוב ← <FractionBoxes /> <span>ואפשר גם לכתוב:</span><RatioBoxes /></div>
-        <div style={row}><strong>היחס בין 3 ל - 6</strong> : נכתוב ← <FractionBoxes /> <span>ואפשר גם לכתוב:</span><RatioBoxes /></div>
-        <div style={row}>אם מצמצמים את היחסים שכתבנו למעלה מקבלים שהם שווים ליחס המצומצם: <FractionBoxes /></div>
-        <ActivityTitle>היחסים שווים = היחסים פרופורציוניים</ActivityTitle>
-        <ActivityTitle>איך כותבים?</ActivityTitle>
-        <p><strong>היחס בין 5 ל - 10 שווה ליחס בין 3 ל - 6</strong></p>
-        <div style={row}><strong>נכתוב (משמאל לימין) ←</strong><FractionBoxes /> = <FractionBoxes /></div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={905}>
+      <TextbookActivityTitle>איך כותבים?</TextbookActivityTitle>
+      <Row><strong>היחס בין 5 ל - 10</strong> : נכתוב ← <TextbookFraction /> <span>ואפשר גם לכתוב:</span><TextbookRatioAnswer /></Row>
+      <Row><strong>היחס בין 3 ל - 6</strong> : נכתוב ← <TextbookFraction /> <span>ואפשר גם לכתוב:</span><TextbookRatioAnswer /></Row>
+      <Row>אם מצמצמים את היחסים שכתבנו למעלה מקבלים שהם שווים ליחס המצומצם: <TextbookFraction /></Row>
+      <TextbookActivityTitle>היחסים שווים = היחסים פרופורציוניים</TextbookActivityTitle>
+      <TextbookActivityTitle>איך כותבים?</TextbookActivityTitle>
+      <p><strong>היחס בין 5 ל - 10 שווה ליחס בין 3 ל - 6</strong></p>
+      <Row><strong>נכתוב (משמאל לימין) ←</strong><TextbookFraction /> = <TextbookFraction /></Row>
+    </ProportionPage>
   );
 }
 
 function Question6() {
   return (
-    <PageLayout pageNumber={906} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 24 }}>
-        <QuestionTitle n={6} />
-        <ActivityTitle>איך כותבים?</ActivityTitle>
-        <p><strong>היחס בין a ל - b שווה ליחס בין c ל - d:</strong></p>
-        <div style={row}><strong>נכתוב (משמאל לימין) ←</strong><FractionBoxes /> = <FractionBoxes /></div>
-        <div style={row}>ואפשר גם לכתוב כך: <RatioBoxes /> = <RatioBoxes /></div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={906}>
+      <TextbookQuestionTitle n={6} />
+      <TextbookActivityTitle>איך כותבים?</TextbookActivityTitle>
+      <p><strong>היחס בין a ל - b שווה ליחס בין c ל - d:</strong></p>
+      <Row><strong>נכתוב (משמאל לימין) ←</strong><TextbookFraction /> = <TextbookFraction /></Row>
+      <Row>ואפשר גם לכתוב כך: <TextbookRatioAnswer /> = <TextbookRatioAnswer /></Row>
+    </ProportionPage>
   );
 }
 
 function Question7() {
   return (
-    <PageLayout pageNumber={907} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 24 }}>
-        <QuestionTitle n={7} />
-        <div style={row}>היחס בין <Fraction num={5} den={10} /> שווה ליחס בין <Fraction num={3} den={6} /> ( כי שניהם שווים ל - <FractionBoxes /> )</div>
-        <div style={{ ...centered, fontSize: 26 }}><Fraction num={5} den={10} /> = <Fraction num={3} den={6} /></div>
-        <ActivityTitle>איזה קשר נוסף יש בין המספרים?</ActivityTitle>
-        <div style={row}><strong>מתקיים כפל בהצלבה:</strong> 5 · <Box width={70} /> = 3 · <Box width={70} /></div>
-        <div style={{ ...row, justifyContent: 'center', marginTop: 18 }}><strong>אם:</strong><Fraction num="a" den="b" /> = <Fraction num="c" den="d" /><strong>אז:</strong><Box width={70} /> · b = <Box width={70} /> · d</div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={907}>
+      <TextbookQuestionTitle n={7} />
+      <Row>היחס בין <TextbookFraction numerator={5} denominator={10} /> שווה ליחס בין <TextbookFraction numerator={3} denominator={6} /> ( כי שניהם שווים ל - <TextbookFraction /> )</Row>
+      <div className="approved-proportion-center"><TextbookFraction numerator={5} denominator={10} /> = <TextbookFraction numerator={3} denominator={6} /></div>
+      <TextbookActivityTitle>איזה קשר נוסף יש בין המספרים?</TextbookActivityTitle>
+      <Row><strong>מתקיים כפל בהצלבה:</strong> 5 · <TextbookAnswerBox size="lg" /> = 3 · <TextbookAnswerBox size="lg" /></Row>
+      <Row center><strong>אם:</strong><TextbookFraction numerator="a" denominator="b" /> = <TextbookFraction numerator="c" denominator="d" /><strong>אז:</strong><TextbookAnswerBox size="lg" /> · b = <TextbookAnswerBox size="lg" /> · d</Row>
+    </ProportionPage>
   );
 }
 
 function Question8() {
   return (
-    <PageLayout pageNumber={908} chapter={CHAPTER} topic={TOPIC}>
-      <div style={{ ...text, display: 'grid', gap: 24 }}>
-        <QuestionTitle n={8} />
-        <p>היחס בין 2 ל-18 שווה ליחס בין 8 ל-x:</p>
-        <div style={row}>השלימו את המשוואה: <Fraction num={2} den={<Box />} /> = <FractionBoxes /></div>
-        <Arrow />
-        <div style={{ ...row, justifyContent: 'center' }}><span>2 · <Box width={72} /> = <Box width={82} /></span><strong style={{ color: ACCENT }}>(כפל בהצלבה)</strong></div>
-        <Arrow />
-        <div style={{ ...row, justifyContent: 'center' }}><em>x</em> = <Box width={82} /></div>
-      </div>
-    </PageLayout>
+    <ProportionPage pageNumber={908}>
+      <TextbookQuestionTitle n={8} />
+      <p>היחס בין 2 ל-18 שווה ליחס בין 8 ל-x:</p>
+      <Row>השלימו את המשוואה: <TextbookFraction numerator={2} denominator={<TextbookAnswerBox />} /> = <TextbookFraction /></Row>
+      <TextbookDownArrow />
+      <Row center><span>2 · <TextbookAnswerBox size="lg" /> = <TextbookAnswerBox size="lg" /></span><strong className="approved-proportion-label">(כפל בהצלבה)</strong></Row>
+      <TextbookDownArrow />
+      <Row center><em>x</em> = <TextbookAnswerBox size="lg" /></Row>
+    </ProportionPage>
   );
 }
 
