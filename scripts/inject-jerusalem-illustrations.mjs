@@ -9,6 +9,7 @@ const requested = process.argv[2] || path.join(root, 'preview', 'full-workbook.h
 const mainFile = path.resolve(requested);
 const parsed = path.parse(mainFile);
 const artifactFile = path.join(parsed.dir, `${parsed.name}-artifact${parsed.ext || '.html'}`);
+const canonicalAssetDir = path.join(root, 'src', 'assets', 'jerusalem');
 
 const REQUIRED_IMAGES = [
   {
@@ -59,70 +60,44 @@ function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-function isCandidateName(name) {
-  return /^(?:cover_bg|ratio-jerusalem-v2-).*\.(?:jpg|jpeg)$/i.test(name.replace(/\s+/g, ''))
-    || /^(?:cover_bg|ratio-jerusalem-v2-).*\.(?:jpg|jpeg)$/i.test(name);
-}
-
-function collectCandidates(dir, depth, out) {
-  if (!dir || depth < 0 || !fs.existsSync(dir)) return;
-  let entries = [];
-  try {
-    entries = fs.readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'dist') continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isFile() && isCandidateName(entry.name)) out.add(full);
-    else if (entry.isDirectory() && depth > 0) collectCandidates(full, depth - 1, out);
-  }
-}
-
 function resolveArtwork() {
-  const home = process.env.USERPROFILE || process.env.HOME || '';
-  const roots = [
-    path.join(root, 'src', 'assets', 'jerusalem'),
-    path.join(root, 'public', 'assets', 'jerusalem'),
-    path.join(root, 'preview', 'assets', 'jerusalem'),
-    process.env.RATIO_JERUSALEM_ASSET_DIR || '',
-    home ? path.join(home, 'Downloads') : '',
-    home ? path.join(home, 'Desktop') : '',
-    home ? path.join(home, 'Pictures') : '',
-    home ? path.join(home, 'Documents') : '',
-  ].filter(Boolean);
+  const missing = [];
+  const invalid = [];
+  const artwork = [];
 
-  const files = new Set();
-  for (const dir of roots) collectCandidates(dir, dir.startsWith(root) ? 4 : 2, files);
-
-  const byHash = new Map();
-  for (const file of files) {
-    try {
-      const hash = sha256(file);
-      if (!byHash.has(hash)) byHash.set(hash, file);
-    } catch {
-      // Ignore unreadable candidate files.
+  for (const item of REQUIRED_IMAGES) {
+    const file = path.join(canonicalAssetDir, item.canonical);
+    if (!fs.existsSync(file)) {
+      missing.push(item.canonical);
+      continue;
     }
-  }
-
-  const missing = REQUIRED_IMAGES.filter((item) => !byHash.has(item.sha256));
-  if (missing.length) {
-    const wanted = missing.map((item) => `- ${item.canonical}`).join('\n');
-    throw new Error(
-      `Missing original Jerusalem artwork. No placeholder will be rendered.\n${wanted}\n` +
-      `Place the original files in Downloads/Desktop or set RATIO_JERUSALEM_ASSET_DIR.`,
-    );
-  }
-
-  return REQUIRED_IMAGES.map((item) => {
-    const file = byHash.get(item.sha256);
-    return {
+    const actualSha256 = sha256(file);
+    if (actualSha256 !== item.sha256) {
+      invalid.push(`${item.canonical}: expected ${item.sha256}, got ${actualSha256}`);
+      continue;
+    }
+    artwork.push({
       ...item,
       file,
       dataUrl: `data:image/jpeg;base64,${fs.readFileSync(file).toString('base64')}`,
-    };
-  });
+    });
+  }
+
+  if (missing.length || invalid.length) {
+    const details = [
+      missing.length ? `Missing canonical files:\n${missing.map((name) => `- ${name}`).join('\n')}` : '',
+      invalid.length ? `SHA-256 mismatch:\n${invalid.map((line) => `- ${line}`).join('\n')}` : '',
+    ].filter(Boolean).join('\n');
+    throw new Error(
+      `Canonical Jerusalem artwork preflight failed. No placeholder will be rendered.\n${details}\n` +
+      `The only accepted source is ${canonicalAssetDir}.`,
+    );
+  }
+
+  if (artwork.length !== REQUIRED_IMAGES.length) {
+    throw new Error(`Jerusalem artwork count mismatch: expected ${REQUIRED_IMAGES.length}, got ${artwork.length}.`);
+  }
+  return artwork;
 }
 
 const artwork = resolveArtwork();
@@ -282,6 +257,7 @@ inject(artifactFile);
 console.log(JSON.stringify({
   status:'jerusalem-full-page-artwork-injected',
   images:artwork.length,
+  canonicalAssetDir,
   files:artwork.map((item)=>({id:item.id,file:item.file,sha256:item.sha256})),
   main:mainFile,
   artifact:artifactFile,
