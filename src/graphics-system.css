@@ -1,0 +1,262 @@
+/* Canonical mathematical graphics system.
+   This is a first-class design layer, not a page-specific override sheet. */
+
+.worksheet-page {
+  --gfx-ink: #1f2a44;
+  --gfx-ink-soft: #475569;
+  --gfx-grid: #d8e0eb;
+  --gfx-grid-strong: #a8b5c6;
+  --gfx-fill-light: #f3f6fa;
+  --gfx-fill-mid: #cbd5e1;
+  --gfx-fill-dark: #64748b;
+  --gfx-accent: #1f2a44;
+  --gfx-blue: #1e40af;
+  --gfx-stroke-fine: 0.9px;
+  --gfx-stroke-normal: 1.5px;
+  --gfx-stroke-strong: 2px;
+  --gfx-dot-radius: 1.45px;
+  --gfx-label-size: 11px;
+  --gfx-small-label-size: 9px;
+}
+
+.worksheet-page svg,
+.worksheet-page .math-graphic {
+  max-width: 100%;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+  color: var(--gfx-ink);
+}
+
+.worksheet-page svg :is(line, path, polyline, polygon, rect, circle, ellipse),
+.worksheet-page .math-graphic :is(line, path, polyline, polygon, rect, circle, ellipse) {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.worksheet-page svg text,
+.worksheet-page .math-graphic text {
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  fill: var(--gfx-ink);
+}
+
+.worksheet-page svg [stroke="#000"],
+.worksheet-page svg [stroke="#111"],
+.worksheet-page svg [stroke="#222"],
+.worksheet-page svg [stroke="#333"],
+.worksheet-page svg [stroke="#172554"],
+.worksheet-page svg [stroke="#1f2a44"] { stroke: var(--gfx-ink); }
+
+.worksheet-page svg [stroke="#ddd"],
+.worksheet-page svg [stroke="#dbe3ef"],
+.worksheet-page svg [stroke="#e2e2e2"] { stroke: var(--gfx-grid); }
+
+.worksheet-page svg [stroke="#888"],
+.worksheet-page svg [stroke="#94a3b8"] { stroke: var(--gfx-grid-strong); }
+
+.worksheet-page svg [fill="#ccc"] { fill: var(--gfx-fill-mid); }
+.worksheet-page svg [fill="#999"] { fill: #94a3b8; }
+.worksheet-page svg [fill="#888"] { fill: #8290a6; }
+.worksheet-page svg [fill="#555"] { fill: #52637d; }
+.worksheet-page svg [fill="#9ca3af"] { fill: #a7b1bf; }
+
+.math-graphic[data-graphic-family="chart"] { overflow: visible; }
+.math-graphic[data-graphic-family="chart"] text {
+  font-weight: 500;
+  paint-order: stroke fill;
+  stroke: #fff;
+  stroke-width: 1.35px;
+  stroke-linejoin: round;
+}
+.math-graphic[data-graphic-family="chart"] rect[fill]:not([fill="none"]):not([fill="#fff"]):not([fill="white"]) {
+  stroke: var(--gfx-ink-soft);
+  stroke-width: 0.8px;
+}
+.math-graphic[data-graphic-family="geometry"] { overflow: visible; }
+.math-graphic[data-graphic-family="geometry"] text {
+  font-weight: 600;
+  paint-order: stroke fill;
+  stroke: #fff;
+  stroke-width: 1.8px;
+  stroke-linejoin: round;
+}
+.math-graphic[data-graphic-family="number-line"] text,
+.math-graphic[data-graphic-family="ratio-model"] text { font-weight: 600; }
+
+.math-graphic[data-graphic-family="counters"] circle[fill="#000"],
+.math-graphic[data-graphic-family="counters"] circle[fill="#111"] { fill: #111827; }
+.math-graphic[data-graphic-family="counters"] circle[fill="#fff"] {
+  fill: #fff;
+  stroke: var(--gfx-ink);
+}
+
+.graph-container > .math-graphic[data-graphic-family="chart"] {
+  width: min(100%, 356px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto 5px;
+}
+.bar-chart-container > .math-graphic[data-graphic-family="chart"] {
+  width: min(100%, 390px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto 5px;
+}
+.number-line-container > .math-graphic[data-graphic-family="number-line"] {
+  width: min(100%, 410px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto;
+}
+.bags-illustration > .math-graphic[data-graphic-family="ratio-model"] {
+  width: min(100%, 385px) !important;
+  height: auto !important;
+  display: block;
+  margin: 3px auto;
+}
+.bracelet-row .math-graphic[data-graphic-family="counters"] { max-width: 275px; }
+.geo-mini.math-graphic[data-graphic-family="geometry"] {
+  height: 58px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+.svg-figure-row .geo-item > .math-graphic[data-graphic-family="geometry"] {
+  height: 68px !important;
+  width: auto !important;
+  max-width: 100%;
+}
+
+.math-graphic[aria-label^="משולש APB"] {
+  height: 195px !important;
+  width: auto !important;
+  max-width: 100%;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="משולש ישר-זווית: זווית ישרה"] {
+  width: 285px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="מלבן ומשולש, יחס שטח"] {
+  width: 185px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="משולש המחולק לשמונה"] {
+  width: 285px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="מלבן ABCD ברוחב 12"] {
+  width: 330px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="שתי זוויות צמודות"] {
+  width: 145px !important;
+  height: auto !important;
+}
+.math-graphic[aria-label^="מערכת צירים ובה משולשים דומים"] {
+  width: 350px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="טרפז ישר זווית"] {
+  width: 350px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="משולש ישר זווית ABC, זווית B ישרה, מלבן"] {
+  width: 270px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+.math-graphic[aria-label^="מלבן ומשולש שווה־שוקיים"] {
+  width: 270px !important;
+  height: auto !important;
+  display: block;
+  margin: 2px auto 5px;
+}
+
+/* Locked-source geometry corrections live here so source-task hashes remain immutable. */
+.wb-group[data-source-key="ch3-page-07"] .math-graphic[viewBox="0 0 200 80"] text:first-of-type {
+  transform: translateY(6px);
+}
+.wb-group[data-source-key="ch3-page-07"] .math-graphic[viewBox="0 0 200 80"] text:last-of-type {
+  transform: translateX(-6px);
+}
+.math-graphic[aria-label^="משולש ישר זווית ABC, הזווית ב־B ישרה"] text:nth-of-type(4) {
+  transform: translateX(9px);
+}
+/* Keep the midpoint label E visually separate from the 6p measurement without editing locked source markup. */
+.math-graphic[aria-label^="מלבן ABCD שאורכו 6p"] text:nth-of-type(5) {
+  transform: translate(8px, 20px);
+}
+/* The legacy source wrapper is capped at 100px; raise only these two high-value diagrams. */
+.geo-figure.compact:has(> .math-graphic[aria-label^="משולש ישר זווית ABC, הזווית ב־B ישרה"]) {
+  max-width: 155px;
+}
+.geo-figure.compact:has(> .math-graphic[aria-label^="מלבן ABCD שאורכו 6p"]) {
+  max-width: 380px;
+}
+.math-graphic[aria-label^="מלבן ABCD שאורכו 6p"] {
+  width: 380px !important;
+  height: auto !important;
+  max-width: 100%;
+  display: block;
+  margin: 3px auto 6px;
+}
+
+.math-graphic[aria-label^="חלון ריבועי"] {
+  width: 235px !important;
+  height: 235px !important;
+  display: block !important;
+  margin: 2px auto 5px;
+  overflow: visible;
+}
+.math-graphic[aria-label^="חלון ריבועי"] > rect:first-of-type {
+  stroke: var(--gfx-ink);
+  stroke-width: 2.35px;
+}
+.math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] {
+  fill: #a7b1bf;
+  stroke: var(--gfx-ink);
+  stroke-width: 1.25px;
+}
+.math-graphic[aria-label^="חלון ריבועי"] > rect[fill^="url("] {
+  stroke: var(--gfx-ink);
+  stroke-width: 1.8px;
+}
+.math-graphic[aria-label^="חלון ריבועי"] pattern circle { fill: var(--gfx-blue); }
+.math-graphic[aria-label^="חלון ריבועי"] > line {
+  stroke: #9cabc0;
+  stroke-width: 0.9px;
+}
+
+@media print {
+  .worksheet-page svg,
+  .worksheet-page .math-graphic {
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .worksheet-page svg text,
+  .worksheet-page .math-graphic text { fill: #111827; }
+  .worksheet-page svg [stroke="#ddd"],
+  .worksheet-page svg [stroke="#dbe3ef"],
+  .worksheet-page svg [stroke="#e2e2e2"] { stroke: #cbd5e1; }
+  .math-graphic[data-graphic-family="chart"] [fill="#5b9bd5"] { fill: #5f6f86; }
+  .math-graphic[data-graphic-family="chart"] [fill="#ed7d31"] { fill: #aeb8c5; }
+  .math-graphic[data-graphic-family="chart"] [fill="#a5a5a5"] { fill: #e4e8ee; }
+  .math-graphic[data-graphic-family="chart"] [fill="#555"] { fill: #4b5563; }
+  .math-graphic[data-graphic-family="chart"] [fill="#ccc"] { fill: #d1d5db; }
+  .math-graphic[aria-label^="חלון ריבועי"] > rect[fill="#9ca3af"] { fill: #aeb4bd; }
+  .math-graphic[aria-label^="חלון ריבועי"] pattern circle { fill: #374151; }
+}

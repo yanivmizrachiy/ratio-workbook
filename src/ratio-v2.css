@@ -1,0 +1,619 @@
+/* Ratio workbook v2 — canonical A4 design layer.
+   Loaded after index.css so legacy pages keep their markup while sharing one visual contract. */
+
+.worksheet-page {
+  --ws-ink: #111827;
+  --ws-ink-soft: #374151;
+  --ws-line: #1f2937;
+  --ws-line-soft: #94a3b8;
+  --ws-rule: #dbe3ef;
+  /* One canonical dark navy for every accent — header title, underline, page-number circle,
+     sub-labels and titled-panel frames all share the frame navy, so the page reads uniform. */
+  --ws-accent: #1f2a44;
+  --ws-accent-2: #1f2a44;
+  --ws-accent-soft: #eef1f7;
+  --ws-fill: #dbeafe;
+  --ws-fill-strong: #64748b;
+  --ws-font-body: 14px;
+  --ws-font-small: 12px;
+  --ws-font-title: 18px;
+  --ws-font-display: 22px;
+  --ws-line-height: 1.48;
+  --ws-space-1: 4px;
+  --ws-space-2: 8px;
+  --ws-space-3: 12px;
+  --ws-answer-h: 30px;
+  width: 210mm;
+  height: 297mm;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  color: var(--ws-ink);
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+}
+
+.page-header,
+.header-container {
+  min-height: 15mm;
+  padding: 4.2mm 14mm 3mm;
+  background: #fff;
+  color: var(--ws-accent-2);
+  border: 0;
+  border-bottom: 1.5px solid var(--ws-accent);
+  box-shadow: none;
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.page-header-title,
+.page-title {
+  letter-spacing: 0;
+  gap: 0;
+}
+
+.page-header-title::before,
+.page-title::before {
+  content: none;
+}
+
+.page-header-num,
+.page-number {
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--ws-accent);
+  border-radius: 50%;
+  color: var(--ws-accent);
+  background: #fff;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.page-content {
+  height: calc(100% - 15mm);
+  padding: 7mm 14mm 9mm;
+  overflow: visible;
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-size: var(--ws-font-body);
+  line-height: var(--ws-line-height);
+  color: var(--ws-ink);
+}
+
+.page-content > *:not(.q-separator) {
+  min-width: 0;
+}
+
+.question-block {
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.question-bullet {
+  width: 7px;
+  height: 7px;
+  margin-top: 7px;
+  background: #1f2a44;
+}
+
+.question-content p,
+.sub-content p {
+  margin: 0 0 3px;
+}
+
+.sub-question {
+  gap: 6px;
+  margin: 9px 18px 9px 0;
+}
+
+.sub-label,
+.answer-label,
+.work-area-label,
+.drawing-label,
+.tray-num {
+  color: var(--ws-accent-2);
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-weight: 600;
+}
+
+.q-separator {
+  min-height: 12px;
+  max-height: 18px;
+  background: none;
+}
+
+.q-separator::before {
+  border-top: 1px solid var(--ws-rule);
+}
+
+.q-separator::after {
+  content: none;
+}
+
+.info-box {
+  background: var(--ws-accent-soft);
+  border: 1px solid #bfdbfe;
+  border-right: 3px solid var(--ws-accent);
+  border-radius: 4px;
+  box-shadow: none;
+  padding: 7px 11px;
+  margin-bottom: 7px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.info-box::before {
+  content: none;
+}
+
+.inline-blank {
+  border-bottom: 1.3px solid var(--ws-line);
+  background: none;
+  height: 1em;
+}
+
+.answer-line {
+  border-bottom: 1.3px solid var(--ws-line);
+}
+
+.ratio-answer-container,
+.final-answer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 18px 4px 0;
+  break-inside: avoid;
+}
+
+.ratio-answer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  direction: ltr;
+  unicode-bidi: isolate;
+  min-height: 30px;
+}
+
+.ratio-answer-box {
+  display: inline-block;
+  width: 34px;
+  height: 30px;
+  border: 1.35px solid #1f2a44;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.ratio-answer-colon {
+  color: var(--ws-ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* A calculation-response is ONE unified titled panel: "דרך:" header bar, the writing field,
+   then the final answer(s) below a divider — a single cohesive frame, not loose parts. */
+.calculation-response {
+  margin: 6px 18px 8px 0;
+  padding: 0;
+  border: 0.7px solid #1f2a44;
+  border-top-width: 4.2px;
+  border-radius: 0;
+  overflow: hidden;
+  background: #fff;
+  break-inside: avoid;
+}
+.calculation-response .work-area { border: none; box-shadow: none; margin: 0; }
+.calculation-response .work-area-space { padding: 6px 12px 8px; }
+.calculation-response .final-answer {
+  margin: 0;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* A standalone writing box is a titled panel — the label rides a thin navy header bar, uniform
+   with the drawing frames. Grouped work areas inside a bordered response box keep the compact
+   inline layout (that outer box is already their frame). */
+.work-area {
+  display: block;
+  /* Every answer panel shares this right-indent so boxes stack in one aligned, symmetric column. */
+  margin: 6px 18px 8px 0;
+  border: 0.7px solid #1f2a44;
+  border-top-width: 4.2px;
+  border-radius: 0;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 68, 0.08);
+}
+/* A box inside a sub-question breaks out past the sub-label (min-width 22px + gap 6px) so its
+   edges line up with the top-level boxes above/below it — one clean column down the page. */
+.sub-content > .work-area,
+.sub-content > .calculation-response,
+.sub-content > .drawing-box {
+  margin-right: -28px;
+  margin-left: 0;
+}
+.work-area-label {
+  display: block;
+  background: #fff;
+  color: #1f2a44;
+  padding: 1px 12px 0;
+  font-family: 'Heebo', 'Assistant', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.work-area .work-area-space {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+/* Inside a response-set the writing area is the same clean thick-top box as everywhere else. */
+.response-set .work-area {
+  margin: 0;
+}
+
+.final-answer {
+  margin: 7px 0 0;
+  padding-top: 5px;
+}
+
+/* A calc sub-question already has its writing box; an unlabeled answer line right below it is
+   redundant ("קווים מיותרים") — the box is the answer space, so drop that extra line + stray unit. */
+.work-area + .final-answer--nolabel {
+  display: none;
+}
+
+.final-answer-line {
+  display: inline-block;
+  flex: 1 1 130px;
+  min-width: 90px;
+  max-width: 230px;
+  height: 20px;
+  border-bottom: 1.4px solid var(--ws-line);
+}
+
+/* The answer blank and its unit form one LTR group so "____°" / "____ ש״ח" read in the right
+   order (the unit sits AFTER the line, not flipped to the wrong side by the RTL context). */
+.final-answer-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.answer-unit {
+  color: var(--ws-ink-soft);
+  font-weight: 500;
+}
+
+/* Titled-panel frame (style 5): square corners, the label rides a thin navy header bar. */
+.drawing-box {
+  margin: 6px 18px 8px 0;
+  border: 0.7px solid #1f2a44;
+  border-top-width: 4.2px;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(31, 42, 68, 0.08);
+  min-height: 84px;
+  padding: 0;
+  overflow: hidden;
+}
+.drawing-box .drawing-label {
+  display: block;
+  background: #fff;
+  color: #1f2a44;
+  font-family: 'Heebo', 'Assistant', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.5;
+  padding: 1px 12px 0;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.drawing-box::before {
+  content: none;
+}
+
+.worksheet-table {
+  /* Hebrew tables read right-to-left: first column (#/label) on the right, then the value columns.
+     The base <table> was computing LTR, which flipped נכונה/לא נכונה to the wrong side. */
+  direction: rtl;
+  margin: 4px 0;
+  border: 1px solid var(--ws-line);
+  font-size: 12.5px;
+}
+/* A few tables were authored with their columns in reverse (label/# column LAST) so they read
+   correctly under the old LTR default. They keep LTR so their as-authored order stays right. */
+.worksheet-table.wt-ltr {
+  direction: ltr;
+}
+
+.worksheet-table th,
+.worksheet-table td {
+  padding: 4px 6px;
+  border: 1px solid #64748b;
+}
+
+.worksheet-table th {
+  background: var(--ws-accent-soft);
+  color: var(--ws-accent-2);
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-size: 12px;
+}
+
+.worksheet-table tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.options-row > span,
+.circles-box,
+.tray {
+  background: #fff;
+  border-color: #94a3b8;
+  box-shadow: none;
+}
+
+.options-row > span {
+  padding: 3px 8px;
+}
+
+.checkbox-box {
+  width: 14px;
+  height: 14px;
+  border-color: #475569;
+  box-shadow: none;
+}
+
+.page-content strong,
+.page-content b {
+  color: inherit;
+  font-weight: 700;
+}
+
+.page-content svg text {
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+  font-weight: 500;
+  fill: var(--ws-ink);
+}
+
+.ratio-tray-grid-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+/* Bar-chart legend — a horizontal swatch row below the plot (never over the bars). */
+.bar-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  direction: rtl;
+}
+.bar-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.bar-chart-swatch {
+  width: 13px;
+  height: 13px;
+  display: inline-block;
+  border: 0.6px solid #333;
+}
+
+.render-page-shell {
+  width: 210mm;
+  height: 297mm;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+.render-page-shell .worksheet-page {
+  margin: 0;
+  box-shadow: none;
+}
+
+/* Shared textbook primitives — one system for current and future approved additions. */
+.textbook-answer-box {
+  display: inline-block;
+  height: var(--ws-answer-h);
+  border: 1.35px solid var(--ws-accent);
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+.textbook-answer-box--sm { width: 30px; }
+.textbook-answer-box--md { width: 38px; }
+.textbook-answer-box--lg { width: 72px; }
+
+.textbook-fraction {
+  display: inline-grid;
+  grid-template-rows: minmax(var(--ws-answer-h), auto) 1px minmax(var(--ws-answer-h), auto);
+  align-items: center;
+  justify-items: center;
+  min-width: 46px;
+  margin-inline: 5px;
+  vertical-align: middle;
+  direction: ltr;
+  unicode-bidi: isolate;
+  line-height: 1;
+}
+.textbook-fraction-slot {
+  min-height: var(--ws-answer-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ws-font-body);
+  font-weight: 600;
+}
+.textbook-fraction-line {
+  width: 100%;
+  min-width: 40px;
+  height: 1.35px;
+  background: var(--ws-accent);
+}
+
+.textbook-ratio-answer {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-inline: 4px;
+  vertical-align: middle;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.textbook-ratio-colon {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ws-ink);
+}
+
+.textbook-select {
+  min-width: 118px;
+  height: 30px;
+  border: 1.2px solid #94a3b8;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ws-ink);
+  font: inherit;
+  line-height: 1;
+  margin-inline: 4px;
+  padding-inline: 7px 28px;
+  vertical-align: middle;
+}
+
+.textbook-down-arrow {
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
+  color: var(--ws-accent);
+  margin: var(--ws-space-1) 0;
+}
+
+.textbook-activity-title {
+  font-size: var(--ws-font-title);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--ws-accent);
+  margin: 0 0 var(--ws-space-2);
+}
+
+.textbook-question-title {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0 0 var(--ws-space-3);
+  font-family: 'Rubik', 'Assistant', Arial, sans-serif;
+}
+.textbook-question-title strong {
+  font-size: 17px;
+  color: var(--ws-accent);
+}
+.textbook-question-title span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.approved-proportion-page .page-content {
+  font-size: var(--ws-font-body);
+  line-height: var(--ws-line-height);
+}
+.approved-proportion-content {
+  display: grid;
+  gap: var(--ws-space-3);
+}
+.approved-proportion-content p {
+  margin: 0;
+}
+.approved-proportion-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.approved-proportion-row--center {
+  justify-content: center;
+}
+.approved-proportion-row--spread {
+  justify-content: space-around;
+  align-items: flex-start;
+}
+.approved-proportion-center {
+  text-align: center;
+}
+.approved-proportion-emphasis {
+  font-size: var(--ws-font-display);
+  font-weight: 700;
+  color: var(--ws-accent);
+}
+.approved-proportion-label {
+  color: var(--ws-accent);
+  font-weight: 700;
+}
+.approved-proportion-pair {
+  text-align: center;
+  min-width: 150px;
+}
+.approved-proportion-pair-title {
+  font-weight: 600;
+  margin-bottom: var(--ws-space-1);
+}
+.approved-proportion-spacer--sm { height: 6px; }
+.approved-proportion-spacer--md { height: 10px; }
+
+@media screen and (max-width: 1023px) {
+  .ratio-workbench {
+    display: block;
+  }
+
+  .ratio-workbench-sidebar {
+    width: 100%;
+    max-height: 42dvh;
+    border-left: 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .ratio-workbench-preview {
+    min-height: 58dvh;
+  }
+
+  .ratio-preview-canvas {
+    padding: 16px;
+  }
+}
+
+@media print {
+  .worksheet-page,
+  .page-content {
+    overflow: visible !important;
+  }
+
+  .page-header,
+  .header-container {
+    background: #fff !important;
+    color: var(--ws-accent-2) !important;
+    border-bottom-color: var(--ws-accent) !important;
+  }
+
+  .textbook-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-inline: 7px;
+  }
+}
