@@ -1,5 +1,5 @@
 export const PRE_REORDER_PAGE_MARKUP_SHA256: Readonly<Record<string, string>> = {
-  "ratio-page-01": "92ffe3563835f1d6a5ba86e3c5c9654f2cab5986dd32bcb647cbbc3d07801a80",
+  "ratio-page-01": "69b16d5a085f3de219f376a2257093754c69a8621154e6a6f2e308d083d8a0be",
   "ratio-page-02": "89f556b6a2f20885cc531ec77ad86fc3af0fdbdad84b590d7dd8281d3b0bc0d1",
   "ch1-page-03": "277db6659ac20c640cc3193f2714201855b3260527aecda1485f1708cc953c4e",
   "ratio-page-04": "c9f4c80e22ae7060ecda4fece56e14e0018754f4a9e6afbd27c122faddf13c3a",
@@ -56,4 +56,4 @@ export const PRE_REORDER_PAGE_MARKUP_SHA256: Readonly<Record<string, string>> = 
   "curriculum-page-07": "11371dc0a9631b56fcfbccb4ad3882df41a3f03597eb02af1f1be0a03ae10c1a"
 };
 
-export const PRE_REORDER_WORKBOOK_SHA256 = "664eb5d579e8ad96734528029fc649040a2beaacc1937021ba9faa2b33912911";
+export const PRE_REORDER_WORKBOOK_SHA256 = "7322dd78cdb12d5deb741dcba4957f8d80e3c761a4783ba67991733460491a49";
