@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - agent/ratio-textbook-reorder-20260819
+      - fix/ratio-rtl-20260821
   pull_request:
     branches:
       - main
