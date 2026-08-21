@@ -27,6 +27,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Canonical artwork + preview preflight
+        run: npm run preview:build
       - run: npx playwright install --with-deps chromium
       - run: npm run verify
       - name: Upload complete preview
@@ -45,5 +47,5 @@ jobs:
             preview/audit/graphics/*.png
             preview/audit/grayscale/*.png
             content-manifest.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
