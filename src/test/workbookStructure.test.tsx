@@ -112,7 +112,7 @@ describe('ratio workbook structure', () => {
 
   it('renders 36 diamonds in the first ratio question', () => {
     const markup = renderKey('ratio-page-01');
-    expect(markup).toContain('היחס בין מספר המעויינים השחורים לבין מספר המעויינים הלבנים הוא 2 : 1');
+    expect(markup).toContain('היחס בין מספר המעויינים השחורים לבין מספר המעויינים הלבנים הוא <bdi dir="ltr">2 : 1</bdi>');
     expect(count(markup, /<polygon/g)).toBe(36);
   });
 
