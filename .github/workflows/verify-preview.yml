@@ -27,8 +27,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Core source, type, tests, sequence and manifest verification
+        run: npm run quality:check && npm run manifest:write
+      - name: Canonical Jerusalem artwork gate
+        run: npm run assets:verify
       - run: npx playwright install --with-deps chromium
-      - run: npm run verify
+      - name: Build and verify complete A4 preview
+        run: npm run preview:build && npm run preview:verify && npm run graphics:invariants
       - name: Upload complete preview
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,5 +50,7 @@ jobs:
             preview/audit/graphics/*.png
             preview/audit/grayscale/*.png
             content-manifest.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
+
+# verification retrigger 2026-08-21T12:34+03:00

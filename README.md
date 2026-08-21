@@ -6,4 +6,4 @@
 
 המקור, ה־build, הבדיקות וה־Preview עצמאיים בריפו זה. `razpages` אינו מקור פעיל של Ratio.
 
-Production: https://yanivmizrachiy.github.io/ratio-workbook/
+העבודה הנוכחית מארגנת את כל המשימות כרצף ספר לימוד מדורג מהקל לקשה, ללא שינוי בתוכן המשימות. ה־`index.html` הציבורי נשאר קפוא עד שיניב רואה את ה־Preview ומאשר במפורש לפרסם.
