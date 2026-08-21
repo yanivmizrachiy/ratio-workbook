@@ -37,7 +37,7 @@ export function RatioPage01() {
   return (
     <PageLayout pageNumber={1} chapter={CH} className="ratio-page-1">
       <Question>
-        <p>סמנו את האיור שבו היחס בין מספר המעויינים השחורים לבין מספר המעויינים הלבנים הוא <bdi dir="ltr">2 : 1</bdi>.</p>
+        <p>סמנו את האיור שבו היחס בין מספר המעויינים השחורים לבין מספר המעויינים הלבנים הוא 2 : 1.</p>
       </Question>
       <div className="circles-grid" aria-label="ארבע אפשרויות של קבוצות מעויינים שחורים ולבנים">
         <div className="circle-option">
