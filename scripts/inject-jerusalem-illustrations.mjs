@@ -1,103 +1,48 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { CANONICAL_ASSET_DIR, JERUSALEM_ASSETS, canonicalAssetPath, verifyCanonicalAssets } from './jerusalem-assets.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(here, '..');
+const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const requested = process.argv[2] || path.join(root, 'preview', 'full-workbook.html');
 const mainFile = path.resolve(requested);
 const parsed = path.parse(mainFile);
 const artifactFile = path.join(parsed.dir, `${parsed.name}-artifact${parsed.ext || '.html'}`);
-const canonicalAssetDir = path.join(root, 'src', 'assets', 'jerusalem');
 
-const REQUIRED_IMAGES = [
-  {
-    id: 'cover',
-    canonical: 'cover_bg.jpg',
-    alt: 'איור צבעוני ירושלמי בנושא יחס',
-    sha256: '704cf13e05a6cacf5c2b793c6e47d097962450f34663ae7b1d8ae3fc0eea55d8',
-  },
-  {
-    id: 'kotel',
-    canonical: 'ratio-jerusalem-v2-1-kotel.jpg',
-    alt: 'הכותל בירושלים עם ייצוג מתמטי של יחס',
-    sha256: 'ce03a0f594346eeaae9c5ad91c764b9cf2341ce50911fe2436bc979e4bf7a5d1',
-  },
-  {
-    id: 'tower-of-david',
-    canonical: 'ratio-jerusalem-v2-2-tower-of-david.jpg',
-    alt: 'מגדל דוד בירושלים עם ייצוג מתמטי של פרופורציה',
-    sha256: 'ce39d3ceddc3acde2a3cb321070d55df1bf48128fb154139623f8c42185be40f',
-  },
-  {
-    id: 'mahane-yehuda',
-    canonical: 'ratio-jerusalem-v2-3-mahane-yehuda.jpg',
-    alt: 'מחנה יהודה בירושלים עם ייצוג מתמטי של יחס',
-    sha256: '73bbea70c539139985b10204deb12518d34a9cbbe3e706fbc571bd2dadf73615',
-  },
-  {
-    id: 'old-city-alley',
-    canonical: 'ratio-jerusalem-v2-5-old-city-alley.jpg',
-    alt: 'סמטה בעיר העתיקה בירושלים עם ייצוג מתמטי של יחס',
-    sha256: '527acc4209cd7c2b84cf985036eff28e1fd3682616cfbeafd3c329d35349fd3c',
-  },
-  {
-    id: 'knesset',
-    canonical: 'ratio-jerusalem-v2-6-knesset.jpg',
-    alt: 'הכנסת בירושלים עם ייצוג מתמטי של יחס',
-    sha256: '3985c4170afa48ccb8fc3a3345f0a70fc6daef1ee1a1c8a7a49e44ce5935d4ea',
-  },
-  {
-    id: 'windmill',
-    canonical: 'ratio-jerusalem-v2-7-windmill.jpg',
-    alt: 'טחנת הרוח בירושלים עם ייצוג מתמטי של יחס',
-    sha256: '0ab7c296bbbecc2f7ea4726897344c6aff23a0bc6ddc8e6b87b58f12503d8363',
-  },
-];
-
-function sha256(file) {
-  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-}
+const ARTWORK_META = Object.freeze({
+  'cover_bg.jpg': { id: 'cover', alt: 'איור צבעוני ירושלמי בנושא יחס' },
+  'ratio-jerusalem-v2-1-kotel.jpg': { id: 'kotel', alt: 'הכותל בירושלים עם ייצוג מתמטי של יחס' },
+  'ratio-jerusalem-v2-2-tower-of-david.jpg': { id: 'tower-of-david', alt: 'מגדל דוד בירושלים עם ייצוג מתמטי של פרופורציה' },
+  'ratio-jerusalem-v2-3-mahane-yehuda.jpg': { id: 'mahane-yehuda', alt: 'מחנה יהודה בירושלים עם ייצוג מתמטי של יחס' },
+  'ratio-jerusalem-v2-5-old-city-alley.jpg': { id: 'old-city-alley', alt: 'סמטה בעיר העתיקה בירושלים עם ייצוג מתמטי של יחס' },
+  'ratio-jerusalem-v2-6-knesset.jpg': { id: 'knesset', alt: 'הכנסת בירושלים עם ייצוג מתמטי של יחס' },
+  'ratio-jerusalem-v2-7-windmill.jpg': { id: 'windmill', alt: 'טחנת הרוח בירושלים עם ייצוג מתמטי של יחס' },
+});
 
 function resolveArtwork() {
-  const missing = [];
-  const invalid = [];
-  const artwork = [];
-
-  for (const item of REQUIRED_IMAGES) {
-    const file = path.join(canonicalAssetDir, item.canonical);
-    if (!fs.existsSync(file)) {
-      missing.push(item.canonical);
-      continue;
-    }
-    const actualSha256 = sha256(file);
-    if (actualSha256 !== item.sha256) {
-      invalid.push(`${item.canonical}: expected ${item.sha256}, got ${actualSha256}`);
-      continue;
-    }
-    artwork.push({
-      ...item,
-      file,
-      dataUrl: `data:image/jpeg;base64,${fs.readFileSync(file).toString('base64')}`,
-    });
-  }
-
-  if (missing.length || invalid.length) {
-    const details = [
-      missing.length ? `Missing canonical files:\n${missing.map((name) => `- ${name}`).join('\n')}` : '',
-      invalid.length ? `SHA-256 mismatch:\n${invalid.map((line) => `- ${line}`).join('\n')}` : '',
-    ].filter(Boolean).join('\n');
+  const verification = verifyCanonicalAssets();
+  const failures = verification.filter((item) => item.status !== 'ok');
+  if (failures.length) {
+    const details = failures.map((item) => {
+      if (item.status === 'missing') return `- ${item.name}: missing`;
+      return `- ${item.name}: SHA-256 mismatch (expected ${item.sha256}, got ${item.actual})`;
+    }).join('\n');
     throw new Error(
       `Canonical Jerusalem artwork preflight failed. No placeholder will be rendered.\n${details}\n` +
-      `The only accepted source is ${canonicalAssetDir}.`,
+      `The only accepted source is ${CANONICAL_ASSET_DIR}.`,
     );
   }
 
-  if (artwork.length !== REQUIRED_IMAGES.length) {
-    throw new Error(`Jerusalem artwork count mismatch: expected ${REQUIRED_IMAGES.length}, got ${artwork.length}.`);
-  }
-  return artwork;
+  return JERUSALEM_ASSETS.map((asset) => {
+    const meta = ARTWORK_META[asset.name];
+    if (!meta) throw new Error(`Missing presentation metadata for canonical asset ${asset.name}.`);
+    const file = canonicalAssetPath(asset.name);
+    return {
+      ...asset,
+      ...meta,
+      file,
+      dataUrl: `data:image/jpeg;base64,${fs.readFileSync(file).toString('base64')}`,
+    };
+  });
 }
 
 const artwork = resolveArtwork();
@@ -257,7 +202,7 @@ inject(artifactFile);
 console.log(JSON.stringify({
   status:'jerusalem-full-page-artwork-injected',
   images:artwork.length,
-  canonicalAssetDir,
+  canonicalAssetDir:CANONICAL_ASSET_DIR,
   files:artwork.map((item)=>({id:item.id,file:item.file,sha256:item.sha256})),
   main:mainFile,
   artifact:artifactFile,
