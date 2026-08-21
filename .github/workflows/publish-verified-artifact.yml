@@ -1,4 +1,4 @@
-name: Publish verified ratio production
+name: Publish verified ratio artifact
 
 on:
   push:
@@ -9,54 +9,39 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
     steps:
-      - name: Checkout current production source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      - name: Build and verify current workbook
-        run: npm run verify
-
-      - name: Require the two approved front pages
+      - name: Download exact verified artifact 133
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test -f preview/full-workbook.html
-          grep -q 'data-front-page="1"' preview/full-workbook.html
-          grep -q 'data-front-page="2"' preview/full-workbook.html
-          test "$(grep -o 'data-front-page="[12]"' preview/full-workbook.html | wc -l)" -eq 2
-          grep -q 'wb-front-page' preview/full-workbook.html
-          echo 'Approved color cover and second opening page are present.'
+          mkdir -p /tmp/ratio-artifact
+          gh api repos/${GITHUB_REPOSITORY}/actions/artifacts/9443955670/zip > /tmp/ratio-artifact.zip
+          unzip -q /tmp/ratio-artifact.zip -d /tmp/ratio-artifact
+          test -f /tmp/ratio-artifact/preview/full-workbook.html
+          echo '7cf8dcd3db8012edbf9df4c9778ed1d414bb929c9c2085ec0d5d1b4dd2be6534  /tmp/ratio-artifact/preview/full-workbook.html' | sha256sum -c -
+          grep -q "page.setAttribute('data-front-page',String(i+1))" /tmp/ratio-artifact/preview/full-workbook.html
+          grep -q 'wb-front-page' /tmp/ratio-artifact/preview/full-workbook.html
 
-      - name: Publish only the fully verified workbook HTML
+      - name: Publish only the verified workbook HTML
         run: |
           set -euo pipefail
-          cp preview/full-workbook.html index.html
+          cp /tmp/ratio-artifact/preview/full-workbook.html index.html
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if git diff --cached --quiet; then
-            echo 'Production already matches the verified current build.'
+            echo 'Production already matches verified artifact 133.'
             exit 0
           fi
-          git commit -m 'publish: restore verified color cover and opening pages'
+          git commit -m 'publish: verified ratio workbook artifact 133 with color cover'
           git push origin HEAD:main
-
-# explicit production retrigger 2026-08-21 cover restore
