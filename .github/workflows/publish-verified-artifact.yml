@@ -58,3 +58,5 @@ jobs:
           fi
           git commit -m 'publish: restore verified color cover and opening pages'
           git push origin HEAD:main
+
+# explicit production retrigger 2026-08-21 cover restore
