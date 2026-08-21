@@ -83,8 +83,6 @@ const injection=`
         var page=document.createElement('section');
         page.className='wb-page wb-front-page';
         page.setAttribute('data-front-page',String(i+1));
-        page.setAttribute('data-textbook-chapter',first.getAttribute('data-textbook-chapter'));
-        page.setAttribute('data-textbook-chapter',first.getAttribute('data-textbook-chapter'));
         page.setAttribute('data-textbook-chapter',first.getAttribute('data-textbook-chapter')||'יחס בסיסי');
 
         var body=document.createElement('div');
@@ -139,6 +137,3 @@ function patch(file){
 patch(main);
 patch(artifact);
 console.log("front-pages-injected");
-
-
-
