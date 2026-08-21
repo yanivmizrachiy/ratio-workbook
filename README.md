@@ -5,3 +5,5 @@
 **כל הדרישות והכללים נמצאים רק ב־[`SOURCE_OF_TRUTH.md`](./SOURCE_OF_TRUTH.md).** README אינו מסמך דרישות נוסף.
 
 המקור, ה־build, הבדיקות וה־Preview עצמאיים בריפו זה. `razpages` אינו מקור פעיל של Ratio.
+
+Production: https://yanivmizrachiy.github.io/ratio-workbook/
