@@ -1,0 +1,65 @@
+name: Publish Ratio PDF On Verified Rerun
+
+on:
+  workflow_run:
+    workflows:
+      - Ratio Workbook Verify
+    types:
+      - requested
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ratio-pdf-production-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out production
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download already verified artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ratio-workbook-preview-141
+          path: verified
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Publish exact verified PDF and small direct-download button
+        shell: bash
+        run: |
+          set -euo pipefail
+          PDF="verified/preview/audit/ratio-workbook-preview.pdf"
+          test -s "$PDF"
+          cp "$PDF" ratio-workbook.pdf
+          python3 <<'PY'
+          from pathlib import Path
+          html = '''<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>יחס ופרופורציה — כיתה ח׳</title><style>html,body{margin:0;height:100%;background:#f4f6f8;font-family:Arial,sans-serif}body{display:flex;flex-direction:column;min-height:100dvh}.top{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;padding:6px max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left));background:#fff;border-bottom:1px solid #dfe3e8;box-shadow:0 1px 6px rgba(0,0,0,.07)}#download{display:inline-flex;align-items:center;justify-content:center;min-width:100px;min-height:34px;padding:0 12px;border:0;border-radius:999px;background:#d71920;color:#fff;text-decoration:none;font:900 12px/1 Arial,sans-serif;letter-spacing:.25px;box-shadow:0 3px 8px rgba(215,25,32,.24);touch-action:manipulation;cursor:pointer}#download:active{transform:scale(.97)}#download:focus-visible{outline:3px solid #111;outline-offset:2px}iframe{display:block;width:100%;flex:1;border:0;background:#fff}@media(max-width:600px){.top{padding-top:5px;padding-bottom:5px}#download{min-width:96px;min-height:34px;padding:0 10px;font-size:12px}}@media print{.top{display:none!important}iframe{height:100vh}}</style></head><body><div class="top"><a id="download" href="./ratio-workbook.pdf" download="ratio-workbook.pdf" aria-label="Download PDF">DOWNLOAD ↓</a></div><iframe id="book" src="./workbook.html" title="חוברת יחס ופרופורציה"></iframe></body></html>'''
+          Path('index.html').write_text(html, encoding='utf-8')
+          sot = Path('SOURCE_OF_TRUTH.md')
+          s = sot.read_text(encoding='utf-8')
+          heading = '## 22. הורדת PDF מהעמוד הראשי — כלל מחייב מ־2026-08-23'
+          if heading not in s:
+              s += '''\n\n## 22. הורדת PDF מהעמוד הראשי — כלל מחייב מ־2026-08-23\n\n- הכפתור הראשון בראש העמוד הציבורי הוא `DOWNLOAD ↓`, באנגלית ועם חץ מטה.\n- הכפתור אדום, קומפקטי ובערך חצי מהגודל של הכפתור הגדול הקודם: כ־100×34 פיקסלים במחשב וכ־96×34 במובייל.\n- הכפתור מוריד ישירות קובץ אחד בשם `ratio-workbook.pdf` מאותו GitHub Pages; אין תלות בקובץ Drive פרטי.\n- קובץ ההורדה הוא ה־PDF המלא מתוך artifact שעבר את שרשרת האימות של הפרויקט, ולא PDF חלקי או צילום מסך.\n- לפני פרסום חובה לבדוק שהקובץ קיים ואינו ריק, שהקישור הוא `./ratio-workbook.pdf`, ושקיים כפתור הורדה אחד בלבד.\n'''
+              sot.write_text(s, encoding='utf-8')
+          PY
+          test -s ratio-workbook.pdf
+          test "$(grep -o 'id="download"' index.html | wc -l)" -eq 1
+          grep -Fq 'href="./ratio-workbook.pdf"' index.html
+          grep -Fq 'download="ratio-workbook.pdf"' index.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html ratio-workbook.pdf SOURCE_OF_TRUTH.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'publish: verified ratio PDF with compact download button'
+            git push origin HEAD:main
+          fi
