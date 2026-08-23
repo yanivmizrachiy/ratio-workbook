@@ -1,4 +1,4 @@
-name: Publish verified ratio artifact
+name: Publish ratio workbook + PDF download
 
 on:
   push:
@@ -19,9 +19,27 @@ jobs:
         with:
           ref: main
 
-      - name: Download exact verified artifact 141
+      - name: Update source of truth first
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! grep -Fq '## הורדה ישירה של כל החוברת כ-PDF' SOURCE_OF_TRUTH.md; then
+            cat >> SOURCE_OF_TRUTH.md <<'EOF'
+
+## הורדה ישירה של כל החוברת כ-PDF
+
+- בקישור החיצוני של חוברת היחס חייב להופיע בכל מכשיר כפתור עגול אדום, ברור ונוח ללחיצה, עם הכיתוב `דאונלוד`.
+- לחיצה אחת מורידה למכשיר קובץ PDF אחד שמכיל את כל דפי החוברת, בלי ניווט בין הדפים ובלי מסכים מיותרים באתר.
+- ה-PDF מיוצר מהגרסה המפורסמת של החוברת לפי כללי ההדפסה הקנוניים, והכפתור עצמו אינו נכנס ל-PDF או להדפסה.
+- ההורדה היא same-origin עם מאפיין `download`, כדי להיות מהירה ונוחה בדפדפנים מודרניים במחשב, Android ו-iPhone/iPad, בכפוף למדיניות ההורדות של הדפדפן ומערכת ההפעלה.
+- לפני פרסום מאמתים שקובץ ה-PDF קיים ואינו ריק, שהכפתור קיים פעם אחת בלבד, שכתובת ההורדה נכונה ושהכפתור מוסתר ב-print.
+EOF
+          fi
+
+      - name: Restore exact verified workbook
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/ratio-artifact
@@ -29,20 +47,62 @@ jobs:
           unzip -q /tmp/ratio-artifact.zip -d /tmp/ratio-artifact
           test -f /tmp/ratio-artifact/preview/full-workbook.html
           echo '508448c8641fdeaa55964134e7e0d1661251226fa608aef625152ad9bd02d605  /tmp/ratio-artifact/preview/full-workbook.html' | sha256sum -c -
-          grep -q "page.setAttribute('data-front-page',String(i+1))" /tmp/ratio-artifact/preview/full-workbook.html
-          grep -q 'wb-front-page' /tmp/ratio-artifact/preview/full-workbook.html
-          grep -q '<bdi dir="ltr">2 : 1</bdi>' /tmp/ratio-artifact/preview/full-workbook.html
+          cp /tmp/ratio-artifact/preview/full-workbook.html index.html
 
-      - name: Publish only the verified workbook HTML
+      - name: Install Chromium renderer
+        shell: bash
         run: |
           set -euo pipefail
-          cp /tmp/ratio-artifact/preview/full-workbook.html index.html
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Build downloadable PDF from all published pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/ratio-http.log 2>&1 &
+          pid=$!
+          trap 'kill $pid 2>/dev/null || true' EXIT
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/index.html >/dev/null && break || sleep 1; done
+          node --input-type=module <<'NODE'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch({headless:true});
+          const page = await browser.newPage({viewport:{width:1280,height:900}});
+          await page.goto('http://127.0.0.1:4173/index.html',{waitUntil:'networkidle'});
+          await page.emulateMedia({media:'print'});
+          await page.pdf({path:'ratio-workbook.pdf',format:'A4',printBackground:true,preferCSSPageSize:true,margin:{top:'0',right:'0',bottom:'0',left:'0'}});
+          await browser.close();
+          NODE
+          test -s ratio-workbook.pdf
+
+      - name: Add red cross-device download button to production
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          block='''<style id="ratio-pdf-download-style">#ratio-pdf-download{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));width:88px;height:88px;border-radius:50%;display:grid;place-items:center;box-sizing:border-box;padding:8px;background:#d71920;color:#fff!important;font:900 15px/1.05 Arial,sans-serif;text-align:center;text-decoration:none!important;border:3px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.30);z-index:2147483647;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}#ratio-pdf-download:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.34)}#ratio-pdf-download:focus-visible{outline:4px solid #111;outline-offset:3px}@media(max-width:600px){#ratio-pdf-download{width:78px;height:78px;font-size:13px;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom))}}@media print{#ratio-pdf-download,#ratio-pdf-download-style{display:none!important}}</style><a id="ratio-pdf-download" href="./ratio-workbook.pdf" download="ratio-workbook.pdf" aria-label="דאונלוד — הורדת כל דפי היחס כ-PDF" title="הורדת כל דפי היחס כ-PDF">דאונלוד</a>'''
+          if 'id="ratio-pdf-download"' not in s:
+              s=s.replace('</body>',block+'</body>',1) if '</body>' in s else s+block
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Verify download UX and publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s ratio-workbook.pdf
+          test "$(grep -o 'id="ratio-pdf-download"' index.html | wc -l)" -eq 1
+          grep -Fq 'href="./ratio-workbook.pdf"' index.html
+          grep -Fq 'download="ratio-workbook.pdf"' index.html
+          grep -Fq '@media print' index.html
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
-          if git diff --cached --quiet; then
-            echo 'Production already matches verified artifact 141.'
-            exit 0
+          git add SOURCE_OF_TRUTH.md index.html ratio-workbook.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m 'publish: add one-tap PDF download to ratio workbook'
+            git push origin HEAD:main
           fi
-          git commit -m 'publish: verified ratio workbook artifact 141 with RTL ratio fix'
-          git push origin HEAD:main
