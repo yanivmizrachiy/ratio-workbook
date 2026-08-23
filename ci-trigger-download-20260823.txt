@@ -1,0 +1,1 @@
+Trigger verified ratio PDF generation and deployment for the approved one-tap download button.
