@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ratio-workbook-${{ github.ref }}
@@ -29,6 +29,45 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run verify
+
+      - name: Publish approved PDF download to production
+        if: github.event_name == 'pull_request' && github.head_ref == 'deploy/ratio-pdf-download'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s preview/audit/ratio-workbook-preview.pdf
+          PDF_PAGES="$(pdfinfo preview/audit/ratio-workbook-preview.pdf | awk '/^Pages:/ {print $2}')"
+          test -n "$PDF_PAGES"
+          cp preview/audit/ratio-workbook-preview.pdf /tmp/ratio-workbook.pdf
+          git fetch origin main
+          git checkout -B main origin/main
+          cp /tmp/ratio-workbook.pdf ratio-workbook.pdf
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'id="ratio-pdf-download"'
+          block = '''<style id="ratio-pdf-download-style">#ratio-pdf-download{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));width:88px;height:88px;border-radius:50%;display:grid;place-items:center;box-sizing:border-box;padding:8px;background:#d71920;color:#fff!important;font:900 15px/1.05 Arial,sans-serif;text-align:center;text-decoration:none!important;border:3px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.30);z-index:2147483647;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}#ratio-pdf-download:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.34)}#ratio-pdf-download:active{transform:scale(.97)}#ratio-pdf-download:focus-visible{outline:4px solid #111;outline-offset:3px}@media(max-width:600px){#ratio-pdf-download{width:78px;height:78px;font-size:13px;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom))}}@media print{#ratio-pdf-download,#ratio-pdf-download-style{display:none!important}}</style><a id="ratio-pdf-download" href="./ratio-workbook.pdf" download="ratio-workbook.pdf" aria-label="דאונלוד — הורדת כל דפי היחס כ-PDF" title="הורדת כל דפי היחס כ-PDF">דאונלוד</a>'''
+          if marker not in s:
+              if '</body>' in s:
+                  s = s.replace('</body>', block + '</body>', 1)
+              else:
+                  s += block
+          p.write_text(s, encoding='utf-8')
+          PY
+          test -s ratio-workbook.pdf
+          test "$(grep -o 'id="ratio-pdf-download"' index.html | wc -l)" -eq 1
+          grep -Fq 'href="./ratio-workbook.pdf"' index.html
+          grep -Fq 'download="ratio-workbook.pdf"' index.html
+          grep -Fq '@media print' index.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html ratio-workbook.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m "publish: add verified ${PDF_PAGES}-page ratio PDF download"
+            git push origin HEAD:main
+          fi
+
       - name: Upload complete preview
         if: always()
         uses: actions/upload-artifact@v4
