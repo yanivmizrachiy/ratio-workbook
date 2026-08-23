@@ -42,6 +42,20 @@ jobs:
           git fetch origin main
           git checkout -B main origin/main
           cp /tmp/ratio-workbook.pdf ratio-workbook.pdf
+          if ! grep -Fq '## 22. הורדה ישירה של כל החוברת כ-PDF' SOURCE_OF_TRUTH.md; then
+            cat >> SOURCE_OF_TRUTH.md <<'EOF'
+
+## 22. הורדה ישירה של כל החוברת כ-PDF — כלל מחייב מ־2026-08-23
+
+- בקישור הציבורי החיצוני של חוברת היחס חייב להופיע בכל גודל מסך כפתור עגול אדום, ברור ונוח ללחיצה, עם הכיתוב `דאונלוד`.
+- לחיצה אחת על הכפתור מורידה למכשיר קובץ PDF אחד שמכיל את כל דפי החוברת, ללא ניווט בין הדפים וללא מסכים מיותרים באתר.
+- קובץ ה־PDF חייב להיגזר מגרסה שעברה את שרשרת האימות המלאה של הפרויקט; אין להחליף אותו בקובץ חלקי, צילום מסך או PDF באיכות מופחתת.
+- הכפתור קבוע מעל תצוגת האתר, מותאם למחשב, Android ו־iPhone/iPad, בעל שטח מגע נוח, ואינו מופיע בתוך הדפסה או בתוך ה־PDF עצמו.
+- ההורדה משתמשת בקובץ PDF אמיתי ובקישור ישיר, כדי שהפעולה תהיה מהירה, יציבה ופשוטה ככל שמדיניות הדפדפן ומערכת ההפעלה מאפשרת.
+- לפני פרסום חובה לאמת שקובץ ה־PDF קיים ואינו ריק, שמספר העמודים שלו מתקבל מה־PDF בפועל, שהכפתור קיים פעם אחת בלבד, שכתובת ההורדה נכונה, ושהכפתור מוסתר ב־print.
+- יניב אישר במפורש ב־2026-08-23 לפרסם דרישה זו ל־Production ולשמור אותה בריפו הקנוני.
+EOF
+          fi
           python3 <<'PY'
           from pathlib import Path
           p = Path('index.html')
@@ -60,9 +74,10 @@ jobs:
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
           grep -Fq 'download="ratio-workbook.pdf"' index.html
           grep -Fq '@media print' index.html
+          grep -Fq '## 22. הורדה ישירה של כל החוברת כ-PDF' SOURCE_OF_TRUTH.md
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html ratio-workbook.pdf
+          git add SOURCE_OF_TRUTH.md index.html ratio-workbook.pdf
           if ! git diff --cached --quiet; then
             git commit -m "publish: add verified ${PDF_PAGES}-page ratio PDF download"
             git push origin HEAD:main
