@@ -5,8 +5,10 @@ on:
     workflows:
       - Ratio Workbook Verify
     types:
-      - requested
       - completed
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,7 +20,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.event.action == 'requested' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -27,16 +29,16 @@ jobs:
         with:
           ref: main
 
-      - name: Download already verified artifact
+      - name: Download exact verified artifact
         uses: actions/download-artifact@v4
         with:
           name: ratio-workbook-preview-141
           path: verified
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: 32489440616
 
-      - name: Publish exact verified PDF and small direct-download button
+      - name: Publish PDF and compact direct-download button
         shell: bash
         run: |
           set -euo pipefail
@@ -51,16 +53,17 @@ jobs:
           s = sot.read_text(encoding='utf-8')
           heading = '## 22. הורדת PDF מהעמוד הראשי — כלל מחייב מ־2026-08-23'
           if heading not in s:
-              s += '''\n\n## 22. הורדת PDF מהעמוד הראשי — כלל מחייב מ־2026-08-23\n\n- הכפתור הראשון בראש העמוד הציבורי הוא `DOWNLOAD ↓`, באנגלית ועם חץ מטה.\n- הכפתור אדום, קומפקטי ובערך חצי מהגודל של הכפתור הגדול הקודם: כ־100×34 פיקסלים במחשב וכ־96×34 במובייל.\n- הכפתור מוריד ישירות קובץ אחד בשם `ratio-workbook.pdf` מאותו GitHub Pages; אין תלות בקובץ Drive פרטי.\n- קובץ ההורדה הוא ה־PDF המלא מתוך artifact שעבר את שרשרת האימות של הפרויקט, ולא PDF חלקי או צילום מסך.\n- לפני פרסום חובה לבדוק שהקובץ קיים ואינו ריק, שהקישור הוא `./ratio-workbook.pdf`, ושקיים כפתור הורדה אחד בלבד.\n'''
+              s += '''\n\n## 22. הורדת PDF מהעמוד הראשי — כלל מחייב מ־2026-08-23\n\n- הכפתור הראשון בראש העמוד הציבורי הוא `DOWNLOAD ↓`, באנגלית ועם חץ מטה.\n- הכפתור אדום וקומפקטי, בערך חצי מהגודל החזותי של הכפתור הגדול הקודם: כ־100×34 פיקסלים במחשב וכ־96×34 במובייל.\n- הכפתור מוריד ישירות קובץ אחד בשם `ratio-workbook.pdf` מאותו GitHub Pages; אין תלות בקובץ Drive פרטי.\n- קובץ ההורדה הוא ה־PDF המלא מתוך artifact שעבר את שרשרת האימות של הפרויקט.\n- לפני פרסום חובה לבדוק שהקובץ קיים ואינו ריק, שהקישור הוא `./ratio-workbook.pdf`, ושקיים כפתור הורדה אחד בלבד.\n'''
               sot.write_text(s, encoding='utf-8')
           PY
           test -s ratio-workbook.pdf
           test "$(grep -o 'id="download"' index.html | wc -l)" -eq 1
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
           grep -Fq 'download="ratio-workbook.pdf"' index.html
+          rm -f download-helper.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html ratio-workbook.pdf SOURCE_OF_TRUTH.md
+          git add -A index.html ratio-workbook.pdf SOURCE_OF_TRUTH.md download-helper.js 2>/dev/null || git add -A
           if ! git diff --cached --quiet; then
             git commit -m 'publish: verified ratio PDF with compact download button'
             git push origin HEAD:main
