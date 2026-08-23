@@ -1,0 +1,2 @@
+function saveRatioWorkbookPdf(){const frame=document.getElementById('book');if(!frame)return;frame.contentWindow.focus();frame.contentWindow.print();}
+document.addEventListener('DOMContentLoaded',()=>{const button=document.getElementById('download');if(button)button.addEventListener('click',saveRatioWorkbookPdf);});
