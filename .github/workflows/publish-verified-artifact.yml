@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/publish-verified-artifact.yml'
+  issues:
+    types: [opened]
   workflow_dispatch:
 
 permissions:
@@ -13,6 +15,7 @@ permissions:
 
 jobs:
   publish:
+    if: github.event_name != 'issues' || github.event.issue.title == '[deploy] ratio pdf download'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
