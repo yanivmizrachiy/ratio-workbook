@@ -25,6 +25,7 @@ jobs:
       - name: Update source of truth first
         run: |
           node scripts/ensure-integrated-site-sot.mjs
+          node scripts/ensure-static-reader-sot.mjs
           node scripts/ensure-ratio-header-sot.mjs
 
       - name: Persist source of truth before code
@@ -35,7 +36,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add SOURCE_OF_TRUTH.md
           if ! git diff --cached --quiet; then
-            git commit -m 'docs: enforce no-demo ratio source of truth'
+            git commit -m 'docs: require real static workbook pages in public reader'
             git push origin HEAD:main
           fi
 
@@ -52,14 +53,22 @@ jobs:
           print(f'logo.png verified: {len(data)} bytes')
           PY
 
-      - name: Publish canonical no-demo shell
+      - name: Build public reader from verified static workbook contract
         shell: bash
         run: |
           set -euo pipefail
           test -s site-shell.html
           test -s workbook.html
           test -s ratio-workbook.pdf
+          grep -Fq "dataset.workbookReady='true'" workbook.html
+          grep -Fq "wb-page worksheet-page" workbook.html
+          node scripts/fix-public-reader.mjs
           cp site-shell.html index.html
+
+      - name: Verify real-page reader before publish
+        shell: bash
+        run: |
+          set -euo pipefail
           grep -Fq 'tszRqqH13Dw' index.html
           grep -Fq 'src="./workbook.html"' index.html
           grep -Fq 'src="./logo.png"' index.html
@@ -69,7 +78,12 @@ jobs:
           grep -Fq 'דפים להדפסה' index.html
           grep -Fq 'הורדת PDF' index.html
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
-          grep -Fq 'אין להציג טקסטי דמו' SOURCE_OF_TRUTH.md
+          grep -Fq "dataset.workbookReady" index.html
+          grep -Fq "querySelectorAll('.wb-page')" index.html
+          grep -Fq 'ratio-reader-current' index.html
+          grep -Fq 'כשל פרסום' SOURCE_OF_TRUTH.md
+          ! grep -Fq 'ratio-editor-sidebar nav button' index.html
+          ! grep -Fq 'לא נמצאו דפים' index.html
           ! grep -Fq 'דף A4 אחד בכל פעם, מותאם למסך' index.html
           ! grep -Fq 'הדפים עצמם נשמרים כפי שפורסמו' index.html
           ! grep -Fq 'חוברת דיגיטלית' index.html
@@ -78,8 +92,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add index.html site-shell.html logo.png scripts/ensure-integrated-site-sot.mjs scripts/ensure-ratio-header-sot.mjs
+          git add SOURCE_OF_TRUTH.md index.html site-shell.html logo.png scripts/ensure-integrated-site-sot.mjs scripts/ensure-static-reader-sot.mjs scripts/fix-public-reader.mjs scripts/ensure-ratio-header-sot.mjs
           if ! git diff --cached --quiet; then
-            git commit -m 'publish: remove demo copy from ratio site'
+            git commit -m 'publish: show verified workbook pages in public reader'
             git push origin HEAD:main
           fi
