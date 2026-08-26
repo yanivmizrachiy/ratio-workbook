@@ -38,69 +38,22 @@ jobs:
           repository: ${{ github.repository }}
           run-id: 32489440616
 
-      - name: Publish verified workbook, PDF, and integrated shell
+      - name: Restore verified workbook and PDF
         shell: bash
         run: |
           set -euo pipefail
-          PDF="verified/preview/audit/ratio-workbook-preview.pdf"
-          BOOK="verified/preview/full-workbook.html"
-          test -s "$PDF"
-          test -s "$BOOK"
-          cp "$PDF" ratio-workbook.pdf
-          cp "$BOOK" workbook.html
+          test -s verified/preview/full-workbook.html
+          test -s verified/preview/audit/ratio-workbook-preview.pdf
+          cp verified/preview/full-workbook.html workbook.html
+          cp verified/preview/audit/ratio-workbook-preview.pdf ratio-workbook.pdf
 
-          if ! grep -Fq '## 23. אתר יחס מאוחד — חוברת + סרטון איילת קריספין' SOURCE_OF_TRUTH.md; then
-            cat >> SOURCE_OF_TRUTH.md <<'EOF'
-
-## 23. אתר יחס מאוחד — חוברת + סרטון איילת קריספין — כלל מחייב מ־2026-08-26
-
-- הקישור הציבורי הקיים של חוברת היחס, שכבר נשלח למורים, נשאר הקישור הקנוני ואינו משתנה.
-- העמוד הציבורי הוא אתר נושא אחד, מעוצב ואחיד, בדפוס של אתרי `misparim` / `zaviyot`.
-- סדר העמוד הציבורי: שער `יחס ופרופורציה` → מקטע `סרטון המחשה בנושא יחס — איילת קריספין` → החוברת הדיגיטלית הקיימת → הורדת PDF.
-- הסרטון הקנוני הוא YouTube `tszRqqH13Dw`, מוטמע בתוך האתר; קישור פתיחה ביוטיוב הוא פעולה משנית בלבד.
-- החוברת עצמה, כל דפיה, סדרה, ה־PDF והיכולת להדפיס נשמרים ללא שינוי תוכן; מעטפת האתר בלבד מחברת אותם לחוויית לימוד אחת.
-- קובץ `workbook.html` הוא החוברת המאומתת, ו־`index.html` הוא המעטפת הציבורית המאוחדת שטוענת אותה.
-- כפתור `DOWNLOAD ↓` נשאר זמין בראש האתר ומוריד ישירות `ratio-workbook.pdf` מאותו origin.
-- המעטפת חייבת להיות RTL, רספונסיבית, נגישה וללא תלות בנכסי עיצוב חיצוניים; החריג היחיד לרשת חיצונית במעטפת הוא הטמעת YouTube המאושרת.
-- פרסום המעטפת המאוחדת אושר במפורש על ידי יניב ב־2026-08-26, כולל החלפת העמוד הציבורי באותו קישור שכבר נשלח למורים.
-EOF
-          fi
-
-          cat > index.html <<'HTML'
-          <!doctype html>
-          <html lang="he" dir="rtl">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-            <meta name="theme-color" content="#1f2a44">
-            <meta name="description" content="יחס ופרופורציה — חוברת דיגיטלית וסרטון המחשה בנושא יחס מאת איילת קריספין">
-            <title>יחס ופרופורציה — יחידת לימוד</title>
-            <style>
-              :root{--ink:#1f2a44;--ink2:#12192b;--gold:#d6ad55;--cream:#fbf8f1;--soft:#f3f5f8;--line:#dfe3ea;--red:#d71920;--muted:#667085;--shadow:0 18px 50px rgba(31,42,68,.14)}
-              *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,"Rubik",sans-serif;line-height:1.5}a{color:inherit}.container{width:min(1160px,calc(100% - 32px));margin-inline:auto}
-              .topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);box-shadow:0 2px 14px rgba(31,42,68,.06)}.topbar__inner{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:900;font-size:15px;white-space:nowrap}.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.nav a{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border-radius:999px;text-decoration:none;font-weight:800;font-size:13px}.nav a:hover{background:var(--soft)}.nav .download{background:var(--red);color:#fff;box-shadow:0 5px 14px rgba(215,25,32,.22)}
-              .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--ink2),var(--ink));color:#fff}.hero:before,.hero:after{content:"";position:absolute;border:1px solid rgba(214,173,85,.34);border-radius:50%}.hero:before{width:460px;height:460px;left:-170px;top:-210px}.hero:after{width:320px;height:320px;right:-130px;bottom:-180px}.hero__inner{position:relative;z-index:1;min-height:430px;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding:68px 0}.eyebrow{display:inline-flex;padding:6px 12px;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;font-weight:800;background:rgba(255,255,255,.07)}h1{font-size:clamp(46px,8vw,88px);line-height:.95;margin:18px 0 16px;letter-spacing:-2px}.hero p{margin:0;max-width:630px;font-size:clamp(18px,2.4vw,24px);color:#eef1f7}.hero__actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border-radius:999px;text-decoration:none;font-weight:900;border:1px solid rgba(255,255,255,.3)}.btn--gold{background:var(--gold);color:var(--ink2);border-color:var(--gold)}.btn--ghost{color:#fff;background:rgba(255,255,255,.07)}
-              .ratio-mark{display:grid;place-items:center}.ratio-card{width:min(100%,390px);aspect-ratio:1/1;border:1px solid rgba(255,255,255,.16);border-radius:32px;background:rgba(255,255,255,.06);display:grid;place-items:center;padding:44px}.ratio-grid{width:100%;display:grid;gap:18px}.ratio-row{display:grid;grid-template-columns:1fr 1.55fr;gap:12px;align-items:center}.ratio-row:nth-child(2){grid-template-columns:1.55fr 1fr}.ratio-bar{height:32px;border-radius:9px;background:linear-gradient(90deg,var(--gold),#edd497)}.ratio-bar.alt{background:linear-gradient(90deg,#fff,#dce4f3)}.ratio-symbol{text-align:center;font-size:50px;font-weight:900;color:var(--gold);line-height:1}
-              .section{padding:72px 0}.section--soft{background:var(--soft)}.section-head{margin-bottom:26px}.section-head small{display:block;color:#8b6a25;font-weight:900;margin-bottom:7px}.section-head h2{margin:0;font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:-.8px}.section-head p{margin:10px 0 0;color:var(--muted);font-size:17px;max-width:760px}
-              .frame{background:var(--ink2);border-radius:22px;padding:12px;box-shadow:var(--shadow);overflow:hidden}.frame__bar{min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 10px;color:#fff;font-size:13px;font-weight:800}.frame__bar a{color:#fff;text-underline-offset:3px}.video{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.credit{color:#cbd3e2;font-weight:700}
-              .workbook-frame{background:#dfe3e8;border-radius:22px;box-shadow:var(--shadow);overflow:hidden;border:1px solid #cfd5df}.workbook-toolbar{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:var(--ink2);color:#fff}.workbook-toolbar strong{font-size:14px}.workbook-toolbar a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 13px;border-radius:999px;background:var(--red);color:#fff;text-decoration:none;font-size:12px;font-weight:900}.workbook-frame iframe{display:block;width:100%;height:84dvh;min-height:650px;border:0;background:#fff}
-              footer{padding:34px 0 44px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);background:#fff}
-              @media(max-width:760px){.container{width:min(100% - 20px,1160px)}.topbar__inner{min-height:54px}.brand{font-size:13px}.nav a:not(.download){display:none}.nav .download{min-height:34px;padding:0 12px;font-size:12px}.hero__inner{grid-template-columns:1fr;min-height:auto;padding:52px 0}.ratio-mark{display:none}.section{padding:52px 0}.frame{border-radius:16px;padding:8px}.frame__bar{align-items:flex-start;flex-direction:column;padding:4px 5px 9px}.workbook-frame{border-radius:14px}.workbook-frame iframe{height:82dvh;min-height:560px}.workbook-toolbar{align-items:flex-start;flex-direction:column}.workbook-toolbar a{width:100%}}
-              @media print{.topbar,.hero,#video,.section-head,.workbook-toolbar,footer{display:none!important}body,.section,.section--soft{background:#fff!important;padding:0!important}.container{width:100%!important}.workbook-frame{border:0!important;border-radius:0!important;box-shadow:none!important}.workbook-frame iframe{height:100vh!important;min-height:100vh!important}}
-            </style>
-          </head>
-          <body>
-            <header class="topbar"><div class="container topbar__inner"><div class="brand">יחס ופרופורציה</div><nav class="nav" aria-label="ניווט ביחידת הלימוד"><a href="#video">סרטון המחשה</a><a href="#workbook">החוברת הדיגיטלית</a><a class="download" href="./ratio-workbook.pdf" download="ratio-workbook.pdf">DOWNLOAD ↓</a></nav></div></header>
-            <main>
-              <section class="hero" aria-labelledby="main-title"><div class="container hero__inner"><div><span class="eyebrow">מתמטיקה · יחידת לימוד</span><h1 id="main-title">יחס ופרופורציה</h1><p>לומדים, צופים ומתרגלים במקום אחד — סרטון המחשה וחוברת דיגיטלית מלאה להדפסה.</p><div class="hero__actions"><a class="btn btn--gold" href="#workbook">לחוברת הדיגיטלית</a><a class="btn btn--ghost" href="#video">לסרטון ההמחשה</a></div></div><div class="ratio-mark" aria-hidden="true"><div class="ratio-card"><div class="ratio-grid"><div class="ratio-row"><span class="ratio-bar"></span><span class="ratio-bar alt"></span></div><div class="ratio-symbol">:</div><div class="ratio-row"><span class="ratio-bar alt"></span><span class="ratio-bar"></span></div></div></div></div></div></section>
-              <section class="section section--soft" id="video"><div class="container"><div class="section-head"><small>צופים ומבינים</small><h2>סרטון המחשה בנושא יחס — איילת קריספין</h2><p>הסרטון משולב כחלק מיחידת הלימוד, לפני המעבר לתרגול בחוברת.</p></div><div class="frame"><div class="frame__bar"><span class="credit">סרטון המחשה בנושא יחס — איילת קריספין</span><a href="https://www.youtube.com/watch?v=tszRqqH13Dw" target="_blank" rel="noopener noreferrer">פתיחה ביוטיוב</a></div><div class="video"><iframe src="https://www.youtube-nocookie.com/embed/tszRqqH13Dw?rel=0" title="סרטון המחשה בנושא יחס — איילת קריספין" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div></div></div></section>
-              <section class="section" id="workbook"><div class="container"><div class="section-head"><small>מתרגלים</small><h2>החוברת הדיגיטלית — יחס ופרופורציה</h2><p>אותם דפים שכבר פורסמו למורים, באותו סדר ובאותה כתובת. ניתן לצפות, לתרגל ולהוריד את כל החוברת כ־PDF.</p></div><div class="workbook-frame"><div class="workbook-toolbar"><strong>דפי יחס ופרופורציה</strong><a href="./ratio-workbook.pdf" download="ratio-workbook.pdf">הורדת כל החוברת PDF ↓</a></div><iframe src="./workbook.html" title="חוברת יחס ופרופורציה" loading="eager"></iframe></div></div></section>
-            </main>
-            <footer><div class="container">יחס ופרופורציה · יחידת לימוד דיגיטלית</div></footer>
-          </body>
-          </html>
-          HTML
-
+      - name: Publish canonical integrated shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/ensure-integrated-site-sot.mjs
+          test -s site-shell.html
+          cp site-shell.html index.html
           test -s index.html
           test -s workbook.html
           test -s ratio-workbook.pdf
@@ -108,9 +61,14 @@ EOF
           grep -Fq 'src="./workbook.html"' index.html
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
           grep -Fq '## 23. אתר יחס מאוחד' SOURCE_OF_TRUTH.md
+
+      - name: Commit production state
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md index.html workbook.html ratio-workbook.pdf
+          git add SOURCE_OF_TRUTH.md index.html workbook.html ratio-workbook.pdf site-shell.html scripts/ensure-integrated-site-sot.mjs
           if ! git diff --cached --quiet; then
             git commit -m 'publish: keep integrated ratio site canonical'
             git push origin HEAD:main
