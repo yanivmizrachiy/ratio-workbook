@@ -1,0 +1,52 @@
+name: Publish integrated ratio site on deploy branch
+
+on:
+  push:
+    branches:
+      - deploy/ratio-integrated-site
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ratio-integrated-production
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out production main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Update source of truth first
+        run: node scripts/ensure-integrated-site-sot.mjs
+
+      - name: Publish canonical integrated shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s site-shell.html
+          test -s workbook.html
+          test -s ratio-workbook.pdf
+          cp site-shell.html index.html
+          grep -Fq 'tszRqqH13Dw' index.html
+          grep -Fq 'סרטון המחשה בנושא יחס — איילת קריספין' index.html
+          grep -Fq 'src="./workbook.html"' index.html
+          grep -Fq 'href="./ratio-workbook.pdf"' index.html
+          grep -Fq '## 23. אתר יחס מאוחד' SOURCE_OF_TRUTH.md
+
+      - name: Commit production state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SOURCE_OF_TRUTH.md index.html site-shell.html scripts/ensure-integrated-site-sot.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'publish: integrated ratio learning site'
+            git push origin HEAD:main
+          fi
