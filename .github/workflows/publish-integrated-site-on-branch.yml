@@ -27,6 +27,18 @@ jobs:
           node scripts/ensure-integrated-site-sot.mjs
           node scripts/ensure-ratio-header-sot.mjs
 
+      - name: Persist source of truth before code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add SOURCE_OF_TRUTH.md
+          if ! git diff --cached --quiet; then
+            git commit -m 'docs: lock exact Zaviyot navigation parity'
+            git push origin HEAD:main
+          fi
+
       - name: Keep approved Zaviyot logo local
         shell: bash
         run: |
@@ -63,9 +75,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md index.html site-shell.html logo.png scripts/ensure-integrated-site-sot.mjs scripts/ensure-ratio-header-sot.mjs
+          git add index.html site-shell.html logo.png scripts/ensure-integrated-site-sot.mjs scripts/ensure-ratio-header-sot.mjs
           if ! git diff --cached --quiet; then
             git commit -m 'publish: align ratio shell with Zaviyot navigation'
             git push origin HEAD:main
