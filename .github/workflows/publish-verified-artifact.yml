@@ -31,7 +31,9 @@ jobs:
         run: gh issue comment "${{ github.event.issue.number }}" --repo "$GITHUB_REPOSITORY" --body "ratio-integrated-deploy: START"
 
       - name: Update source of truth first
-        run: node scripts/ensure-integrated-site-sot.mjs
+        run: |
+          node scripts/ensure-integrated-site-sot.mjs
+          node scripts/ensure-static-reader-sot.mjs
 
       - name: Restore exact verified workbook
         env:
@@ -45,6 +47,8 @@ jobs:
           test -s /tmp/ratio-artifact/preview/full-workbook.html
           echo '508448c8641fdeaa55964134e7e0d1661251226fa608aef625152ad9bd02d605  /tmp/ratio-artifact/preview/full-workbook.html' | sha256sum -c -
           cp /tmp/ratio-artifact/preview/full-workbook.html workbook.html
+          grep -Fq "dataset.workbookReady='true'" workbook.html
+          grep -Fq "wb-page worksheet-page" workbook.html
 
       - name: Install Chromium renderer
         run: |
@@ -65,6 +69,9 @@ jobs:
           const browser = await chromium.launch({headless:true});
           const page = await browser.newPage({viewport:{width:1280,height:900}});
           await page.goto('http://127.0.0.1:4173/workbook.html',{waitUntil:'networkidle'});
+          await page.waitForFunction(() => document.documentElement.dataset.workbookReady === 'true');
+          const count = await page.locator('.wb-page').count();
+          if (count < 1) throw new Error('Verified workbook rendered zero .wb-page elements');
           await page.emulateMedia({media:'print'});
           await page.pdf({path:'ratio-workbook.pdf',format:'A4',printBackground:true,preferCSSPageSize:true,margin:{top:'0',right:'0',bottom:'0',left:'0'}});
           await browser.close();
@@ -75,6 +82,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          node scripts/fix-public-reader.mjs
           test -s site-shell.html
           cp site-shell.html index.html
           test -s index.html
@@ -85,7 +93,12 @@ jobs:
           grep -Fq 'src="./workbook.html"' index.html
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
           grep -Fq 'download="ratio-workbook.pdf"' index.html
-          grep -Fq '## 23. אתר יחס מאוחד' SOURCE_OF_TRUTH.md
+          grep -Fq "dataset.workbookReady" index.html
+          grep -Fq "querySelectorAll('.wb-page')" index.html
+          grep -Fq 'ratio-reader-current' index.html
+          grep -Fq 'כשל פרסום' SOURCE_OF_TRUTH.md
+          ! grep -Fq 'ratio-editor-sidebar nav button' index.html
+          ! grep -Fq 'לא נמצאו דפים' index.html
 
       - name: Commit production state
         shell: bash
@@ -93,9 +106,9 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md index.html workbook.html ratio-workbook.pdf site-shell.html scripts/ensure-integrated-site-sot.mjs
+          git add SOURCE_OF_TRUTH.md index.html workbook.html ratio-workbook.pdf site-shell.html scripts/ensure-integrated-site-sot.mjs scripts/ensure-static-reader-sot.mjs scripts/fix-public-reader.mjs
           if ! git diff --cached --quiet; then
-            git commit -m 'publish: integrate ratio workbook and Ayelet video'
+            git commit -m 'publish: integrate verified static workbook reader'
             git push origin HEAD:main
           fi
 
