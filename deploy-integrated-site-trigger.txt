@@ -1,0 +1,1 @@
+trigger: verified static workbook reader 2026-08-26T14:05Z
