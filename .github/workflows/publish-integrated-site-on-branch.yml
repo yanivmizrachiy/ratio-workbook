@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSL --retry 3 --retry-delay 2 \
-            'https://raw.githubusercontent.com/yanivmizrachiy/misparim/e577e0cdf2673757997fc61a6dc7ebe0aaa0a879/zaviyot/public/logo.png' \
+            'https://zaviyot.vercel.app/logo.png' \
             -o logo.png
           python3 - <<'PY'
           from pathlib import Path
