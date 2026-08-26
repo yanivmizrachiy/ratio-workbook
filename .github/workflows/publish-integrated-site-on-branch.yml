@@ -35,7 +35,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add SOURCE_OF_TRUTH.md
           if ! git diff --cached --quiet; then
-            git commit -m 'docs: lock exact Zaviyot navigation parity'
+            git commit -m 'docs: enforce no-demo ratio source of truth'
             git push origin HEAD:main
           fi
 
@@ -52,7 +52,7 @@ jobs:
           print(f'logo.png verified: {len(data)} bytes')
           PY
 
-      - name: Publish canonical Zaviyot-style shell
+      - name: Publish canonical no-demo shell
         shell: bash
         run: |
           set -euo pipefail
@@ -66,10 +66,13 @@ jobs:
           grep -Fq 'logo-spin 20s linear infinite' index.html
           grep -Fq 'עמוד הבית' index.html
           grep -Fq 'סרטון המחשה' index.html
-          grep -Fq 'החוברת הדיגיטלית' index.html
-          grep -Fq 'הורדת החוברת' index.html
+          grep -Fq 'דפים להדפסה' index.html
+          grep -Fq 'הורדת PDF' index.html
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
-          grep -Fq '## 25. סרגל ניווט זהה ממש לאתר זוויות' SOURCE_OF_TRUTH.md
+          grep -Fq 'אין להציג טקסטי דמו' SOURCE_OF_TRUTH.md
+          ! grep -Fq 'דף A4 אחד בכל פעם, מותאם למסך' index.html
+          ! grep -Fq 'הדפים עצמם נשמרים כפי שפורסמו' index.html
+          ! grep -Fq 'חוברת דיגיטלית' index.html
 
       - name: Commit production state
         shell: bash
@@ -77,6 +80,6 @@ jobs:
           set -euo pipefail
           git add index.html site-shell.html logo.png scripts/ensure-integrated-site-sot.mjs scripts/ensure-ratio-header-sot.mjs
           if ! git diff --cached --quiet; then
-            git commit -m 'publish: align ratio shell with Zaviyot navigation'
+            git commit -m 'publish: remove demo copy from ratio site'
             git push origin HEAD:main
           fi
