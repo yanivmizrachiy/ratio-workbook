@@ -46,12 +46,16 @@ jobs:
           test -s verified/preview/audit/ratio-workbook-preview.pdf
           cp verified/preview/full-workbook.html workbook.html
           cp verified/preview/audit/ratio-workbook-preview.pdf ratio-workbook.pdf
+          grep -Fq "dataset.workbookReady='true'" workbook.html
+          grep -Fq "wb-page worksheet-page" workbook.html
 
       - name: Publish canonical integrated shell
         shell: bash
         run: |
           set -euo pipefail
           node scripts/ensure-integrated-site-sot.mjs
+          node scripts/ensure-static-reader-sot.mjs
+          node scripts/fix-public-reader.mjs
           test -s site-shell.html
           cp site-shell.html index.html
           test -s index.html
@@ -60,7 +64,12 @@ jobs:
           grep -Fq 'tszRqqH13Dw' index.html
           grep -Fq 'src="./workbook.html"' index.html
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
-          grep -Fq '## 23. אתר יחס מאוחד' SOURCE_OF_TRUTH.md
+          grep -Fq "dataset.workbookReady" index.html
+          grep -Fq "querySelectorAll('.wb-page')" index.html
+          grep -Fq 'ratio-reader-current' index.html
+          grep -Fq 'כשל פרסום' SOURCE_OF_TRUTH.md
+          ! grep -Fq 'ratio-editor-sidebar nav button' index.html
+          ! grep -Fq 'לא נמצאו דפים' index.html
 
       - name: Commit production state
         shell: bash
@@ -68,8 +77,8 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md index.html workbook.html ratio-workbook.pdf site-shell.html scripts/ensure-integrated-site-sot.mjs
+          git add SOURCE_OF_TRUTH.md index.html workbook.html ratio-workbook.pdf site-shell.html scripts/ensure-integrated-site-sot.mjs scripts/ensure-static-reader-sot.mjs scripts/fix-public-reader.mjs
           if ! git diff --cached --quiet; then
-            git commit -m 'publish: keep integrated ratio site canonical'
+            git commit -m 'publish: keep static workbook reader canonical'
             git push origin HEAD:main
           fi
