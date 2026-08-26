@@ -8,39 +8,40 @@
   <title>יחס ופרופורציה — יחידת לימוד</title>
   <link rel="stylesheet" href="./vendor/fonts/rubik.css">
   <style>
-    :root{--ink:#1f2a44;--ink2:#12192b;--z-ink:#11203c;--z-gold:#c2a24e;--gold:#d6ad55;--cream:#fbf8f1;--soft:#f3f5f8;--line:#dfe3ea;--red:#d71920;--muted:#667085;--shadow:0 18px 50px rgba(31,42,68,.14);--nav-h:56px;--radius-btn:4px;--step--1:clamp(.80rem,.77rem + .15vw,.875rem)}
+    :root{--ink:#1f2a44;--ink2:#12192b;--z-ink:#11203c;--z-gold:#c2a24e;--cream:#fbf8f1;--soft:#f3f5f8;--line:#dfe3ea;--red:#d71920;--muted:#667085;--shadow:0 18px 50px rgba(31,42,68,.14);--nav-h:56px;--radius-btn:4px;--step--1:clamp(.80rem,.77rem + .15vw,.875rem)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:"Rubik",Arial,sans-serif;line-height:1.5}a{color:inherit}.container{width:100%;max-width:1160px;margin-inline:auto;padding-inline:20px}section[id]{scroll-margin-top:calc(var(--nav-h) + 18px)}
 
-    /* כותרת מוסדית — אותם צבעים, מבנה ומידות כמו zaviyot */
     .masthead{background:var(--z-ink);color:#f2f2f2;border-bottom:2px solid var(--z-gold)}
     .masthead__inner{--logo-s:clamp(76px,9vw,124px);display:grid;grid-template-columns:minmax(var(--logo-s),1fr) auto minmax(var(--logo-s),1fr);align-items:center;column-gap:16px;padding-block:16px;text-align:center}
     .masthead__logobox{grid-column:1;position:relative;align-self:center;justify-self:start;width:var(--logo-s);height:var(--logo-s)}
     .masthead__logo{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;background:#fff;border:3px solid var(--z-gold);box-shadow:0 0 0 3px rgba(255,255,255,.14),0 5px 16px rgba(0,0,0,.5),0 0 22px rgba(194,162,78,.4);object-fit:cover;animation:logo-spin 20s linear infinite;transform-origin:50% 50%;will-change:transform}
-    .masthead__logobox:hover .masthead__logo{box-shadow:0 0 0 3px rgba(255,255,255,.2),0 6px 20px rgba(0,0,0,.55),0 0 28px rgba(194,162,78,.6)}
     @keyframes logo-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
     .masthead__text{grid-column:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-width:0}
     .masthead__lead{font-size:clamp(1.35rem,1.22rem + .65vw,1.65rem);font-weight:700;color:var(--z-gold);line-height:1.25;max-width:60rem}
     .masthead__year{font-size:calc(var(--step--1) * 2);font-weight:600;color:#fff;line-height:1.2}
     .masthead__credit{font-size:var(--step--1);line-height:1.35;color:#c7c7c7;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);padding:3px 10px;border-radius:999px;white-space:nowrap}
 
-    /* SiteNav — מועתק עקרונית מ-zaviyot/src/components/SiteNav.tsx + sitenav.css */
     .sitenav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(194,162,78,.45)}
     .sitenav__inner{display:flex;align-items:center;gap:4px;min-height:var(--nav-h);overflow-x:auto;scrollbar-width:none}
     .sitenav__inner::-webkit-scrollbar{display:none}
-    .sitenav__home{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;min-height:38px;margin-inline-end:8px;padding:6px 16px;border:1.5px solid var(--z-gold);border-radius:999px;background:#fff;font-family:"Rubik",Arial,sans-serif;font-size:var(--step--1);font-weight:700;color:var(--z-ink);text-decoration:none;box-shadow:inset 0 0 0 1px var(--z-gold);transition:border-color .18s ease,box-shadow .18s ease}
-    .sitenav__home:hover{text-decoration:none;border-color:var(--z-gold);box-shadow:0 2px 10px rgba(194,162,78,.28)}
-    .sitenav__home svg{flex:none}
-    .sitenav__link{display:inline-flex;align-items:center;min-height:44px;white-space:nowrap;font-family:"Rubik",Arial,sans-serif;font-size:var(--step--1);font-weight:600;color:var(--z-ink);padding:8px 14px;border-radius:var(--radius-btn);text-decoration:none;transition:background .18s ease,color .18s ease}
+    .sitenav__home{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;min-height:38px;margin-inline-end:8px;padding:6px 16px;border:1.5px solid var(--z-gold);border-radius:999px;background:#fff;font-size:var(--step--1);font-weight:700;color:var(--z-ink);text-decoration:none;box-shadow:inset 0 0 0 1px var(--z-gold)}
+    .sitenav__home:hover{box-shadow:0 2px 10px rgba(194,162,78,.28)}.sitenav__home svg{flex:none}
+    .sitenav__link{display:inline-flex;align-items:center;min-height:44px;white-space:nowrap;font-size:var(--step--1);font-weight:600;color:var(--z-ink);padding:8px 14px;border-radius:var(--radius-btn);text-decoration:none}
     .sitenav__link:hover{background:transparent;color:var(--z-ink);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px}
 
-    .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--ink2),var(--ink));color:#fff}.hero:before,.hero:after{content:"";position:absolute;border:1px solid rgba(214,173,85,.34);border-radius:50%}.hero:before{width:460px;height:460px;left:-170px;top:-210px}.hero:after{width:320px;height:320px;right:-130px;bottom:-180px}.hero__inner{position:relative;z-index:1;min-height:430px;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding:68px 20px}.eyebrow{display:inline-flex;padding:6px 12px;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:13px;font-weight:800;background:rgba(255,255,255,.07)}h1{font-size:clamp(46px,8vw,88px);line-height:.95;margin:18px 0 16px;letter-spacing:normal}.hero p{margin:0;max-width:630px;font-size:clamp(18px,2.4vw,24px);color:#eef1f7}.hero__actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border-radius:999px;text-decoration:none;font-weight:900;border:1px solid rgba(255,255,255,.3)}.btn--gold{background:var(--gold);color:var(--ink2);border-color:var(--gold)}.btn--ghost{color:#fff;background:rgba(255,255,255,.07)}
-    .ratio-mark{display:grid;place-items:center}.ratio-card{width:min(100%,390px);aspect-ratio:1/1;border:1px solid rgba(255,255,255,.16);border-radius:32px;background:rgba(255,255,255,.06);display:grid;place-items:center;padding:44px}.ratio-grid{width:100%;display:grid;gap:18px}.ratio-row{display:grid;grid-template-columns:1fr 1.55fr;gap:12px;align-items:center}.ratio-row:nth-child(3){grid-template-columns:1.55fr 1fr}.ratio-bar{height:32px;border-radius:9px;background:linear-gradient(90deg,var(--gold),#edd497)}.ratio-bar.alt{background:linear-gradient(90deg,#fff,#dce4f3)}.ratio-symbol{text-align:center;font-size:50px;font-weight:900;color:var(--gold);line-height:1}
+    .hero{background:linear-gradient(135deg,#12192b,#1b2741);color:#fff}
+    .hero__inner{min-height:190px;display:flex;align-items:center;justify-content:flex-start;padding-top:34px;padding-bottom:36px}
+    .hero__copy{max-width:680px}
+    h1{font-size:clamp(32px,4.2vw,50px);line-height:1.04;margin:0 0 10px;font-weight:700;letter-spacing:normal}
+    .hero p{margin:0;max-width:620px;font-size:clamp(14px,1.5vw,17px);line-height:1.65;color:#e8edf6;font-weight:400}
+
     .section{padding:72px 0}.section--soft{background:var(--soft)}.section-head{margin-bottom:26px}.section-head small{display:block;color:#8b6a25;font-weight:900;margin-bottom:7px}.section-head h2{margin:0;font-size:clamp(30px,5vw,48px);line-height:1.08;letter-spacing:normal}.section-head p{margin:10px 0 0;color:var(--muted);font-size:17px;max-width:760px}
     .frame{background:var(--ink2);border-radius:22px;padding:12px;box-shadow:var(--shadow);overflow:hidden}.frame__bar{min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 8px 10px;color:#fff;font-size:13px;font-weight:800}.frame__bar a{color:#fff;text-underline-offset:3px}.video{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000}.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.credit{color:#cbd3e2;font-weight:700}
     .workbook-frame{background:#dfe3e8;border-radius:22px;box-shadow:var(--shadow);overflow:hidden;border:1px solid #cfd5df}.workbook-toolbar{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:var(--ink2);color:#fff}.workbook-toolbar strong{font-size:14px}.workbook-toolbar a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 13px;border-radius:999px;background:var(--red);color:#fff;text-decoration:none;font-size:12px;font-weight:900}.workbook-frame iframe{display:block;width:100%;height:84dvh;min-height:650px;border:0;background:#fff}
     footer{padding:34px 0 44px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);background:#fff}
-    @media(max-width:760px){.container{padding-inline:10px}.masthead__inner{--logo-s:72px;grid-template-columns:var(--logo-s) minmax(0,1fr) var(--logo-s);column-gap:8px;padding-block:10px}.masthead__lead{font-size:14px}.masthead__year{font-size:19px}.masthead__credit{font-size:10.5px;white-space:normal;padding:3px 7px}.sitenav__inner{min-height:56px;padding-inline:10px}.sitenav__home{padding:6px 13px;margin-inline-end:4px}.sitenav__link{padding:8px 12px}.hero__inner{grid-template-columns:1fr;min-height:auto;padding:52px 10px}.ratio-mark{display:none}.section{padding:52px 0}.frame{border-radius:16px;padding:8px}.frame__bar{align-items:flex-start;flex-direction:column;padding:4px 5px 9px}.workbook-frame{border-radius:14px}.workbook-frame iframe{height:82dvh;min-height:560px}.workbook-toolbar{align-items:flex-start;flex-direction:column}.workbook-toolbar a{width:100%}}
-    @media(max-width:420px){.masthead__inner{--logo-s:62px;column-gap:6px}.masthead__text{gap:5px}.masthead__lead{font-size:12px}.masthead__year{font-size:17px}.masthead__credit{font-size:9.5px}}
+
+    @media(max-width:760px){.container{padding-inline:10px}.masthead__inner{--logo-s:72px;grid-template-columns:var(--logo-s) minmax(0,1fr) var(--logo-s);column-gap:8px;padding-block:10px}.masthead__lead{font-size:14px}.masthead__year{font-size:19px}.masthead__credit{font-size:10.5px;white-space:normal;padding:3px 7px}.sitenav__inner{min-height:56px;padding-inline:10px}.sitenav__home{padding:6px 13px;margin-inline-end:4px}.sitenav__link{padding:8px 12px}.hero__inner{min-height:150px;padding-top:26px;padding-bottom:28px}.hero__copy{max-width:100%}h1{font-size:clamp(28px,10vw,38px);margin-bottom:7px}.hero p{font-size:14px;line-height:1.55}.section{padding:52px 0}.frame{border-radius:16px;padding:8px}.frame__bar{align-items:flex-start;flex-direction:column;padding:4px 5px 9px}.workbook-frame{border-radius:14px}.workbook-frame iframe{height:82dvh;min-height:560px}.workbook-toolbar{align-items:flex-start;flex-direction:column}.workbook-toolbar a{width:100%}}
+    @media(max-width:420px){.masthead__inner{--logo-s:62px;column-gap:6px}.masthead__text{gap:5px}.masthead__lead{font-size:12px}.masthead__year{font-size:17px}.masthead__credit{font-size:9.5px}.hero__inner{min-height:132px;padding-top:22px;padding-bottom:24px}h1{font-size:30px}.hero p{font-size:13px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.masthead__logo{animation:none}}
     @media print{.masthead,.sitenav,.hero,#video,.section-head,.workbook-toolbar,footer{display:none!important}body,.section,.section--soft{background:#fff!important;padding:0!important}.container{width:100%!important;max-width:none!important;padding:0!important}.workbook-frame{border:0!important;border-radius:0!important;box-shadow:none!important}.workbook-frame iframe{height:100vh!important;min-height:100vh!important}}
   </style>
@@ -48,9 +49,7 @@
 <body id="top">
   <header class="masthead" aria-label="הדרכה במחוז ירושלים והעיר ירושלים">
     <div class="container masthead__inner">
-      <span class="masthead__logobox">
-        <img class="masthead__logo" src="./logo.png" alt="יחידת מתמטיקה — מחוז ירושלים והעיר ירושלים" width="220" height="220">
-      </span>
+      <span class="masthead__logobox"><img class="masthead__logo" src="./logo.png" alt="יחידת מתמטיקה — מחוז ירושלים והעיר ירושלים" width="220" height="220"></span>
       <div class="masthead__text">
         <span class="masthead__lead">הדרכה במחוז ירושלים והעיר ירושלים - מנח״י, בהובלת איילת קריספין</span>
         <span class="masthead__year">שנה״ל התשפ״ז</span>
@@ -58,34 +57,26 @@
       </div>
     </div>
   </header>
+
   <nav class="sitenav" aria-label="ניווט בעמוד">
     <div class="container sitenav__inner">
-      <a class="sitenav__home" href="#top" aria-current="page">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h5v-6h4v6h5V9.5"></path></svg>
-        עמוד הבית
-      </a>
+      <a class="sitenav__home" href="#top" aria-current="page"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h5v-6h4v6h5V9.5"></path></svg>עמוד הבית</a>
       <a class="sitenav__link" href="#video">סרטון המחשה</a>
       <a class="sitenav__link" href="#workbook">החוברת הדיגיטלית</a>
       <a class="sitenav__link" href="./ratio-workbook.pdf" download="ratio-workbook.pdf">הורדת החוברת</a>
     </div>
   </nav>
+
   <main>
     <section class="hero" aria-labelledby="main-title">
       <div class="container hero__inner">
-        <div>
-          <span class="eyebrow">מתמטיקה · יחידת לימוד</span>
+        <div class="hero__copy">
           <h1 id="main-title">יחס ופרופורציה</h1>
-          <p>לומדים, צופים ומתרגלים במקום אחד — סרטון המחשה וחוברת דיגיטלית מלאה להדפסה.</p>
-          <div class="hero__actions">
-            <a class="btn btn--gold" href="#workbook">לחוברת הדיגיטלית</a>
-            <a class="btn btn--ghost" href="#video">לסרטון ההמחשה</a>
-          </div>
-        </div>
-        <div class="ratio-mark" aria-hidden="true">
-          <div class="ratio-card"><div class="ratio-grid"><div class="ratio-row"><span class="ratio-bar"></span><span class="ratio-bar alt"></span></div><div class="ratio-symbol">:</div><div class="ratio-row"><span class="ratio-bar alt"></span><span class="ratio-bar"></span></div></div></div>
+          <p>יחידת לימוד דיגיטלית מסודרת לצפייה, תרגול והדפסה.</p>
         </div>
       </div>
     </section>
+
     <section class="section section--soft" id="video">
       <div class="container">
         <div class="section-head"><small>צופים ומבינים</small><h2>סרטון המחשה בנושא יחס — איילת קריספין</h2><p>הסרטון משולב כחלק מיחידת הלימוד, לפני המעבר לתרגול בחוברת.</p></div>
@@ -95,6 +86,7 @@
         </div>
       </div>
     </section>
+
     <section class="section" id="workbook">
       <div class="container">
         <div class="section-head"><small>מתרגלים</small><h2>החוברת הדיגיטלית — יחס ופרופורציה</h2><p>אותם דפים שכבר פורסמו למורים, באותו סדר ובאותה כתובת. ניתן לצפות, לתרגל ולהוריד את כל החוברת כ־PDF.</p></div>
@@ -105,6 +97,7 @@
       </div>
     </section>
   </main>
+
   <footer><div class="container">יחס ופרופורציה · יחידת לימוד דיגיטלית</div></footer>
 </body>
 </html>
