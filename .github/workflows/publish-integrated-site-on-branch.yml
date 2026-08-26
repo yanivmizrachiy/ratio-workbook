@@ -23,21 +23,44 @@ jobs:
           ref: main
 
       - name: Update source of truth first
-        run: node scripts/ensure-integrated-site-sot.mjs
+        run: |
+          node scripts/ensure-integrated-site-sot.mjs
+          node scripts/ensure-ratio-header-sot.mjs
 
-      - name: Publish canonical integrated shell
+      - name: Copy approved Zaviyot logo locally
         shell: bash
         run: |
           set -euo pipefail
+          curl -fsSL --retry 3 --retry-delay 2 \
+            'https://raw.githubusercontent.com/yanivmizrachiy/misparim/e577e0cdf2673757997fc61a6dc7ebe0aaa0a879/zaviyot/public/logo.png' \
+            -o logo.png
+          python3 - <<'PY'
+          from pathlib import Path
+          data = Path('logo.png').read_bytes()
+          assert data[:8] == b'\x89PNG\r\n\x1a\n', 'logo.png is not a PNG'
+          assert len(data) > 100_000, 'logo.png is unexpectedly small'
+          print(f'logo.png verified: {len(data)} bytes')
+          PY
+
+      - name: Apply canonical Zaviyot-style header
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/apply-zaviyot-header.mjs
           test -s site-shell.html
           test -s workbook.html
           test -s ratio-workbook.pdf
+          test -s logo.png
           cp site-shell.html index.html
           grep -Fq 'tszRqqH13Dw' index.html
           grep -Fq 'סרטון המחשה בנושא יחס — איילת קריספין' index.html
           grep -Fq 'src="./workbook.html"' index.html
           grep -Fq 'href="./ratio-workbook.pdf"' index.html
-          grep -Fq '## 23. אתר יחס מאוחד' SOURCE_OF_TRUTH.md
+          grep -Fq 'src="./logo.png"' index.html
+          grep -Fq 'הדרכה במחוז ירושלים והעיר ירושלים - מנח״י, בהובלת איילת קריספין' index.html
+          grep -Fq 'שנה״ל התשפ״ז' index.html
+          grep -Fq 'logo-spin 20s linear infinite' index.html
+          grep -Fq '## 24. כותרת עליונה ולוגו מסתובב' SOURCE_OF_TRUTH.md
 
       - name: Commit production state
         shell: bash
@@ -45,8 +68,8 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md index.html site-shell.html scripts/ensure-integrated-site-sot.mjs
+          git add SOURCE_OF_TRUTH.md index.html site-shell.html logo.png scripts/ensure-integrated-site-sot.mjs scripts/ensure-ratio-header-sot.mjs scripts/apply-zaviyot-header.mjs
           if ! git diff --cached --quiet; then
-            git commit -m 'publish: integrated ratio learning site'
+            git commit -m 'publish: add Zaviyot-style rotating header to ratio site'
             git push origin HEAD:main
           fi
