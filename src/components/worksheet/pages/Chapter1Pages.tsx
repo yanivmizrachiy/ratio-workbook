@@ -168,7 +168,7 @@ export function Ch1Page3() {
       <Question>
         <p><strong>היחס בין מספר המבוגרים שיצאו לטיול למספר הילדים הוא 5:1</strong></p>
         <SubQuestion label="א."><p>האם ניתן לדעת מהנתונים כמה תלמידים יצאו לטיול? <Blank /></p></SubQuestion>
-        <SubQuestion label="ב."><p><strong>השלימו</strong> : מספר התלמידים בטיול הוא מספר שמתחלק ב - <Blank /> .</p></SubQuestion>
+        <SubQuestion label="ב."><p><strong>השלימו</strong> : מספר המבוגרים בטיול הוא מספר שמתחלק ב - <Blank /> .</p></SubQuestion>
         <SubQuestion label="ג."><p>האם ניתן לדעת מה המספר הכולל של היוצאים לטיול? <Blank /></p></SubQuestion>
         <SubQuestion label="ד."><p><strong>השלימו</strong> : מספר היוצאים הכולל הוא מספר שמתחלק ב - <Blank /> .</p></SubQuestion>
       </Question>
@@ -453,7 +453,7 @@ export function Ch1Page8() {
       <Question>
         <p>מצאו את <strong>המספר החסר</strong> בכל סעיף.</p>
         <div className="options-grid-2col gap-md" style={{ rowGap: '16px', columnGap: '26px' }}>
-          <span>1 : 2  =  <Blank /> : 3</span>
+          <span>1 : 2  =  <Blank /> : 6</span>
           <span><Frac num={2} den={3} /> = <Frac num={6} den="□" /></span>
           <span>20 : <Blank />  =  2 : 5</span>
           <span><Frac num={2} den={5} /> = <Frac num={20} den="□" /></span>

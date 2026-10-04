@@ -97,7 +97,7 @@ export function Ch4Page2() {
       <Question>
         <p>בכוס I  ערבבו 2 טיפות צבע כחול ו - 5 טיפות צבע צהוב.</p>
         <p>בכוס II ערבבו 3 טיפות צבע כחול ו - 7 טיפות צבע צהוב.</p>
-        <p>באיזו כוס התקבל צבע ירוק <strong>כהה יותר</strong>? הסבירו על-ידי השוואת היחסים.</p>
+        <p>באיזו כוס שיעור הטיפות הכחולות מתוך כלל הטיפות גדול יותר? הסבירו על-ידי השוואת היחסים.</p>
         <WorkArea lines={2} label="השוואת היחסים:" />
         <WorkArea lines={2} label="הסבר :" />
       </Question>
@@ -137,14 +137,14 @@ export function Ch4Page3() {
         <SubQuestion label="א.">
           <p>כמה ק"מ נוסעת כל מכונית לליטר אחד?</p>
           <WorkArea lines={2} />
-          <FinalAnswer label="סעו-נא :" unit='ק"מ' />
-          <FinalAnswer label="הנוסעים :" unit='ק"מ' />
+          <FinalAnswer label="סעו-נא :" unit='ק"מ/ליטר' />
+          <FinalAnswer label="הנוסעים :" unit='ק"מ/ליטר' />
         </SubQuestion>
         <SubQuestion label="ב.">
           <p>כמה ק"מ תעבור כל מכונית ב - 25 ליטרים?</p>
           <WorkArea lines={2} />
-          <FinalAnswer label="סעו-נא :" unit='ק"מ' />
-          <FinalAnswer label="הנוסעים :" unit='ק"מ' />
+          <FinalAnswer label="סעו-נא :" unit={'ק"מ'} />
+          <FinalAnswer label="הנוסעים :" unit={'ק"מ'} />
         </SubQuestion>
         <SubQuestion label="ג.">
           <p>כמה דלק תצרוך כל אחת בנסיעה של 150 ק"מ?</p>

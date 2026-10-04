@@ -513,7 +513,7 @@ export function Ch2Page10() {
       <QSep />
 
       <Question>
-        <p>היחס בין שני מספרים הוא 4 : 9 , <strong>מכפלת</strong> המספרים היא 144 . מצאו את שני המספרים.</p>
+        <p>היחס בין שני מספרים <strong>חיוביים</strong> הוא 4 : 9 , <strong>מכפלת</strong> המספרים היא 144 . מצאו את שני המספרים.</p>
         <div className="calculation-response">
           <WorkArea lines={4} />
           <FinalAnswer label="המספר הראשון:" />

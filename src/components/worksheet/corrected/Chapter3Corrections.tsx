@@ -369,7 +369,7 @@ export function RatioPage21() {
       <Question>
         <p>בשקיות א׳, ב׳ ו־ג׳ יש כדורים שחורים ולבנים.</p>
         <BagsModel />
-        <SubQuestion label="א."><p>אם מעבירים את תכולת ג׳ לא׳, מהו היחס בין לבנים לשחורים?</p></SubQuestion>
+        <SubQuestion label="א."><p>אם מעבירים את תכולת ג׳ לא׳, מהו היחס בין לבנים לשחורים?</p><RatioAnswer /></SubQuestion>
         <SubQuestion label="ב."><p>אם מאחדים את שלוש השקיות, מהו היחס בין מספר הכדורים הכולל למספר הכדורים השחורים?</p></SubQuestion>
         <div className="options-row"><span>5 : 2</span><span>1 : 4</span><span>3 : 1</span><span>1 : 3</span></div>
       </Question>
@@ -535,7 +535,7 @@ export function RatioPage23() {
       <Question>
         <p>במערך של 14 משבצות, 2 צבועות ו־12 לבנות.</p>
         <SubQuestion label="א."><p>מהו היחס המצומצם בין הצבועות ללבנות?</p></SubQuestion>
-        <SubQuestion label="ב."><p>אם נצבע משבצת נוספת, כמה משבצות לבנות צריך להוסיף כדי לשמור על היחס?</p></SubQuestion>
+        <SubQuestion label="ב."><p>אם נצבע אחת מ־12 המשבצות הלבנות, כמה משבצות לבנות צריך להוסיף כדי לשמור על היחס?</p></SubQuestion>
       </Question>
 
       <QSep />

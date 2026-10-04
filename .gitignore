@@ -1,13 +1,33 @@
 node_modules/
 dist/
 preview/
-content-manifest.json
-full-workbook.html
 coverage/
 playwright-report/
 test-results/
 .vite/
+.cache/
+
+# Generated workbook artifacts that are not canonical source
+content-manifest.json
+full-workbook.html
 scripts/.generated-*.mjs
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Temporary / backup / editor files
 *.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
 *.log
 .DS_Store
+Thumbs.db

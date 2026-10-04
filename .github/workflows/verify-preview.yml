@@ -2,18 +2,16 @@ name: Ratio Workbook Verify
 
 on:
   push:
-    branches:
-      - agent/ratio-textbook-reorder-20260819
   pull_request:
     branches:
       - main
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: ratio-workbook-${{ github.ref }}
+  group: ratio-workbook-verify-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -21,73 +19,31 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run verify
 
-      - name: Publish approved PDF download to production
-        if: github.event_name == 'pull_request' && github.head_ref == 'deploy/ratio-pdf-download'
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s preview/audit/ratio-workbook-preview.pdf
-          PDF_PAGES="$(pdfinfo preview/audit/ratio-workbook-preview.pdf | awk '/^Pages:/ {print $2}')"
-          test -n "$PDF_PAGES"
-          cp preview/audit/ratio-workbook-preview.pdf /tmp/ratio-workbook.pdf
-          git fetch origin main
-          git checkout -B main origin/main
-          cp /tmp/ratio-workbook.pdf ratio-workbook.pdf
-          if ! grep -Fq '## 22. הורדה ישירה של כל החוברת כ-PDF' SOURCE_OF_TRUTH.md; then
-            cat >> SOURCE_OF_TRUTH.md <<'EOF'
+      - name: Install dependencies
+        run: npm ci
 
-## 22. הורדה ישירה של כל החוברת כ-PDF — כלל מחייב מ־2026-08-23
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
 
-- בקישור הציבורי החיצוני של חוברת היחס חייב להופיע בכל גודל מסך כפתור עגול אדום, ברור ונוח ללחיצה, עם הכיתוב `דאונלוד`.
-- לחיצה אחת על הכפתור מורידה למכשיר קובץ PDF אחד שמכיל את כל דפי החוברת, ללא ניווט בין הדפים וללא מסכים מיותרים באתר.
-- קובץ ה־PDF חייב להיגזר מגרסה שעברה את שרשרת האימות המלאה של הפרויקט; אין להחליף אותו בקובץ חלקי, צילום מסך או PDF באיכות מופחתת.
-- הכפתור קבוע מעל תצוגת האתר, מותאם למחשב, Android ו־iPhone/iPad, בעל שטח מגע נוח, ואינו מופיע בתוך הדפסה או בתוך ה־PDF עצמו.
-- ההורדה משתמשת בקובץ PDF אמיתי ובקישור ישיר, כדי שהפעולה תהיה מהירה, יציבה ופשוטה ככל שמדיניות הדפדפן ומערכת ההפעלה מאפשרת.
-- לפני פרסום חובה לאמת שקובץ ה־PDF קיים ואינו ריק, שמספר העמודים שלו מתקבל מה־PDF בפועל, שהכפתור קיים פעם אחת בלבד, שכתובת ההורדה נכונה, ושהכפתור מוסתר ב־print.
-- יניב אישר במפורש ב־2026-08-23 לפרסם דרישה זו ל־Production ולשמור אותה בריפו הקנוני.
-EOF
-          fi
-          python3 <<'PY'
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          marker = 'id="ratio-pdf-download"'
-          block = '''<style id="ratio-pdf-download-style">#ratio-pdf-download{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));width:88px;height:88px;border-radius:50%;display:grid;place-items:center;box-sizing:border-box;padding:8px;background:#d71920;color:#fff!important;font:900 15px/1.05 Arial,sans-serif;text-align:center;text-decoration:none!important;border:3px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.30);z-index:2147483647;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}#ratio-pdf-download:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(0,0,0,.34)}#ratio-pdf-download:active{transform:scale(.97)}#ratio-pdf-download:focus-visible{outline:4px solid #111;outline-offset:3px}@media(max-width:600px){#ratio-pdf-download{width:78px;height:78px;font-size:13px;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom))}}@media print{#ratio-pdf-download,#ratio-pdf-download-style{display:none!important}}</style><a id="ratio-pdf-download" href="./ratio-workbook.pdf" download="ratio-workbook.pdf" aria-label="דאונלוד — הורדת כל דפי היחס כ-PDF" title="הורדת כל דפי היחס כ-PDF">דאונלוד</a>'''
-          if marker not in s:
-              if '</body>' in s:
-                  s = s.replace('</body>', block + '</body>', 1)
-              else:
-                  s += block
-          p.write_text(s, encoding='utf-8')
-          PY
-          test -s ratio-workbook.pdf
-          test "$(grep -o 'id="ratio-pdf-download"' index.html | wc -l)" -eq 1
-          grep -Fq 'href="./ratio-workbook.pdf"' index.html
-          grep -Fq 'download="ratio-workbook.pdf"' index.html
-          grep -Fq '@media print' index.html
-          grep -Fq '## 22. הורדה ישירה של כל החוברת כ-PDF' SOURCE_OF_TRUTH.md
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md index.html ratio-workbook.pdf
-          if ! git diff --cached --quiet; then
-            git commit -m "publish: add verified ${PDF_PAGES}-page ratio PDF download"
-            git push origin HEAD:main
-          fi
+      - name: Full repository verification
+        run: npm run verify
 
-      - name: Upload complete preview
+      - name: Upload verified preview artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ratio-workbook-preview-${{ github.run_number }}
+          name: ratio-workbook-verify-${{ github.run_id }}
           path: |
             preview/full-workbook.html
             preview/full-workbook-artifact.html
@@ -99,5 +55,5 @@ EOF
             preview/audit/graphics/*.png
             preview/audit/grayscale/*.png
             content-manifest.json
-          if-no-files-found: error
-          retention-days: 30
+          if-no-files-found: warn
+          retention-days: 14
