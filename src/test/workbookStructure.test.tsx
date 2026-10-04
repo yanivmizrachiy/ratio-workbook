@@ -196,8 +196,11 @@ describe('ratio workbook structure', () => {
     expect(markup).toContain('הסבר:');
     expect(markup).toContain('ratio-answer-colon');
     expect(count(markup, /ratio-answer-box/g)).toBeGreaterThanOrEqual(2);
-    for (const value of ['12', '6', '8', '10', 'AB=18', 'BC=15', 'DF=5']) {
+    for (const value of ['12', '6', '8', '10', '18', '15', '5']) {
       expect(markup).toMatch(new RegExp(`<text[^>]*direction="ltr"[^>]*>${value}</text>`));
+    }
+    for (const forbidden of ['AB=18', 'BC=15', 'DF=5']) {
+      expect(markup).not.toMatch(new RegExp(`<text[^>]*>${forbidden}</text>`));
     }
   });
 
@@ -210,12 +213,15 @@ describe('ratio workbook structure', () => {
     expect(renderKey('ch6-page-03')).toContain('x = מספר כוסות הקמח');
     expect(renderKey('ch2-page-10')).toContain('מספרים <strong>חיוביים</strong>');
     expect(renderKey('ch1-page-08')).toContain('1 : 2  =  <span class="inline-blank"></span> : 6');
+    expect(renderKey('ch1-page-03')).toContain('מספר המבוגרים בטיול הוא מספר שמתחלק');
     expect(renderKey('ratio-page-23')).toContain('אחת מ־12 המשבצות הלבנות');
     expect(renderKey('ch7-page-08')).toContain('הוא 2 : 1');
     expect(renderKey('ch7-page-08')).toContain('<span class="fraction"><span class="frac-num">2</span><span class="frac-line"></span><span class="frac-den">3</span></span>');
+    expect(renderKey('ch7-page-08')).toContain('<span class="fraction"><span class="frac-num">1</span><span class="frac-line"></span><span class="frac-den">3</span></span>');
     expect(renderKey('ch7-page-07')).toContain('א׳ 16, ב׳ 24, ג׳ 20, ד׳ 30');
     expect(renderKey('ch7-page-05')).toContain('160 ס&quot;מ');
     expect(renderKey('ch7-page-05')).toContain('240 ס&quot;מ');
+    expect(renderKey('ch7-page-05')).toContain('משולש DEF שצלעותיו 5, 4 ו־2');
     expect(renderKey('ratio-page-42')).toContain('A(0,20)');
     expect(renderKey('ratio-page-42')).toContain('B(12,0)');
   });
