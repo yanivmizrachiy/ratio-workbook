@@ -46,7 +46,7 @@ export const PRE_REORDER_PAGE_MARKUP_SHA256: Readonly<Record<string, string>> = 
   "ch7-page-07": "1aef472484a7f1735e454dd3b4f42f6fa62247a3ccfb816eeb05f1c2692b1907",
   "ch7-page-08": "2cf9973a59d610f6731e2796f9bdb979187e5033c72021b3267078ca8b75dd61",
   "ch7-page-09": "dc1ff242cfcf06a646a3afd4542318223debef0395bb2139ad9e14a1796b8eda",
-  "ratio-page-48": "f2c2277d7cf79fe6b75b28e2115f52e36b2b6c5c80b026f92aad8036313421e7",
+  "ratio-page-48": "f302c80c9634e7a54ac6f069ec15fd2999da96b7eeb4832d4b796eb57b3483bd",
   "curriculum-page-01": "b76e947d3b9d9cecd84be7925603dc725ec5e69826cd2b514709bf2272f128f5",
   "curriculum-page-02": "e8b7800c0baf3f218f308bfcee9957d3cb6acb957c1857f51b9df1473bd5fd6a",
   "curriculum-page-03": "dd7adb69be0559f579a34bcf5fb1fb0946798f4ed044a96c7e0e2ac26147ace9",
