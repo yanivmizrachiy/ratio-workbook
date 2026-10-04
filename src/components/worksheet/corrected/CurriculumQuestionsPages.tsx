@@ -128,7 +128,7 @@ export function CurriculumPage02() {
   return (
     <PageLayout pageNumber={58} chapter={CH} topic={TOPIC} className="curriculum-page">
       <Question>
-        <p>חילקו 18 כדורי משחק לשתי קבוצות של ילדים ביחס של 5 : 4. כל ילד קיבל כדור אחד. כמה כדורים קיבל כל ילד?</p>
+        <p>חילקו 18 כדורי משחק לשתי קבוצות ביחס של 5 : 4. כמה כדורים קיבלה כל קבוצה?</p>
         <CalculationResponse lines={3} />
       </Question>
 

@@ -86,17 +86,15 @@ function PopulationChart() {
   );
 }
 
-// Hook rail: A ── 90 ── B ── 120 ── C
+// Hook rail: A ── 160 ── B ── 240 ── C
 function HookRail() {
   const W = 460, H = 90;
-  const ax = 40, bx = 200, cx = 413; // 90:120 = 3:4 exact at 1.7778 px/unit → AB=160px, BC=213.3px
+  const ax = 40, bx = 190, cx = 415; // display distances 150:225 = 2:3, matching 160:240
   return (
     <div className="flex justify-center my-2">
-      <svg width={W} height={H} aria-hidden="true">
-        {/* rail */}
+      <svg width={W} height={H} role="img" aria-label="מסילה עם לולאות A B C ומרחקים 160 ו־240 סנטימטרים" shapeRendering="geometricPrecision">
         <line x1="20" y1="40" x2={W - 20} y2="40" stroke="#333" strokeWidth="2" />
         <line x1="20" y1="44" x2={W - 20} y2="44" stroke="#333" strokeWidth="2" />
-        {/* hooks */}
         {[{ x: ax, l: 'A' }, { x: bx, l: 'B' }, { x: cx, l: 'C' }].map((p) => (
           <g key={p.l}>
             <path d={`M ${p.x} 44 Q ${p.x} 60, ${p.x - 6} 64 Q ${p.x - 10} 70, ${p.x} 74 Q ${p.x + 10} 70, ${p.x + 6} 64 Q ${p.x} 60, ${p.x} 44`} fill="none" stroke="#333" strokeWidth="1.5" />
@@ -104,15 +102,14 @@ function HookRail() {
             <text x={p.x} y="22" fontSize="14" textAnchor="middle" fontWeight="bold">{p.l}</text>
           </g>
         ))}
-        {/* measurements */}
-        <text x={(ax + bx) / 2} y="88" fontSize="11" textAnchor="middle">90 ס"מ</text>
-        <text x={(bx + cx) / 2} y="88" fontSize="11" textAnchor="middle">120 ס"מ</text>
+        <text x={(ax + bx) / 2} y="88" fontSize="11" textAnchor="middle">160 ס"מ</text>
+        <text x={(bx + cx) / 2} y="88" fontSize="11" textAnchor="middle">240 ס"מ</text>
       </svg>
     </div>
   );
 }
 
-// Similar triangles ABC ~ DEF (DEF lengths shown)
+// Similar triangles ABC ~ DEF (official DEF side lengths: 2, 4, 5)
 function SimilarTriangles() {
   return (
     <div className="flex justify-center gap-12 my-2">
@@ -122,14 +119,14 @@ function SimilarTriangles() {
         <text x="154" y="156" fontSize="12">B</text>
         <text x="58" y="16" fontSize="12">C</text>
       </svg>
-      <svg width="130" height="160" role="img" aria-label="משולש DEF שצלעותיו 9, 7 ו־5" shapeRendering="geometricPrecision">
-        <polygon points="16,120 115,120 80.2,77.4" fill="none" stroke="#222" strokeWidth="1.8" />
+      <svg width="140" height="160" role="img" aria-label="משולש DEF שצלעותיו 5, 4 ו־2" shapeRendering="geometricPrecision">
+        <polygon points="16,120 116,120 90,89.6" fill="none" stroke="#222" strokeWidth="1.8" />
         <text x="8" y="133" fontSize="12">D</text>
-        <text x="118" y="133" fontSize="12">E</text>
-        <text x="76" y="72" fontSize="12">F</text>
-        <text x="65" y="134" fontSize="11" textAnchor="middle" direction="ltr">9</text>
-        <text x="38" y="98" fontSize="11" textAnchor="middle" direction="ltr">7</text>
-        <text x="104" y="98" fontSize="11" textAnchor="middle" direction="ltr">5</text>
+        <text x="119" y="133" fontSize="12">E</text>
+        <text x="88" y="84" fontSize="12">F</text>
+        <text x="66" y="136" fontSize="11" textAnchor="middle" direction="ltr">5</text>
+        <text x="50" y="101" fontSize="11" textAnchor="middle" direction="ltr">4</text>
+        <text x="105" y="101" fontSize="11" textAnchor="middle" direction="ltr">2</text>
       </svg>
     </div>
   );
@@ -158,13 +155,13 @@ function TrianglesDOCAOB() {
   );
 }
 
-// Kangaroo jumps bar chart: A 30, B 20, C 40, D 6 (avg = 24)
+// Kangaroo jumps bar chart: official source values A 16, B 24, C 20, D 30
 function KangarooChart() {
   const data = [
-    { l: "א'", v: 30 },
-    { l: "ב'", v: 20 },
-    { l: "ג'", v: 40 },
-    { l: "ד'", v: 6 },
+    { l: "א'", v: 16 },
+    { l: "ב'", v: 24 },
+    { l: "ג'", v: 20 },
+    { l: "ד'", v: 30 },
   ];
   const W = 288, H = 214, padL = 52, padB = 36, padT = 14;
   const innerH = H - padB - padT;
@@ -172,7 +169,7 @@ function KangarooChart() {
   const yFor = (v: number) => padT + innerH * (1 - v / 50);
   return (
     <div className="flex justify-center my-2">
-      <svg width={W} height={H} className="border border-[#888] bg-white" role="img" aria-label="דיאגרמת עמודות של מספר הקפיצות לכל קנגורו: א׳ 30, ב׳ 20, ג׳ 40, ד׳ 6">
+      <svg width={W} height={H} className="border border-[#888] bg-white" role="img" aria-label="דיאגרמת עמודות של מספר הקפיצות לכל קנגורו: א׳ 16, ב׳ 24, ג׳ 20, ד׳ 30">
         {[0, 10, 20, 30, 40, 50].map((v) => (
           <g key={v}>
             <line x1={padL} y1={yFor(v)} x2={W - 8} y2={yFor(v)} stroke="#ddd" strokeWidth="0.5" />
@@ -556,7 +553,7 @@ export function Ch7Page8() {
     <PageLayout pageNumber={46} chapter={CH} topic={TOPIC}>
 
       <Question>
-        <p>ביממה יש 24 שעות. היחס בין מספר השעות שדניאל יְשֵׁנה ביממה למספר השעות שבהן היא ערה הוא 1 : 2 . כמה שעות דניאל יְשֵׁנה ביממה?</p>
+        <p>ביממה יש 24 שעות. היחס בין מספר השעות שדניאל יְשֵׁנה ביממה למספר השעות שבהן היא ערה הוא 2 : 1 . כמה שעות דניאל יְשֵׁנה ביממה?</p>
         <p className="mt-1">תשובה : <Blank /> שעות</p>
       </Question>
 
@@ -567,7 +564,7 @@ export function Ch7Page8() {
         <div className="info-box">
           <p><strong>מתכון להכנת בצק לעוגיות</strong></p>
           <p>מערבבים בקערה את המצרכים האלה :</p>
-          <p>2 כוסות קמח &nbsp;·&nbsp; <Frac num={1} den={2} /> כוס סוכר &nbsp;·&nbsp; <Frac num={1} den={4} /> כוס חלב &nbsp;·&nbsp; 100 גר' חמאה</p>
+          <p>2 כוסות קמח &nbsp;·&nbsp; <Frac num={2} den={3} /> כוס סוכר &nbsp;·&nbsp; <Frac num={1} den={3} /> כוס חלב &nbsp;·&nbsp; 100 גר' חמאה</p>
         </div>
         <SubQuestion label="א.">
           <p>מה היחס בין כמות הסוכר לכמות החלב במתכון של נֹגַה?</p>

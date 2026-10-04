@@ -13,34 +13,22 @@ import {
 const CH = 'פרק 7 – יחס בנתונים, תרשימים וגאומטריה';
 
 function CoordinateTriangles() {
-  const originX = 62;
-  const originY = 184;
-  const scale = 9;
+  const originX = 145;
+  const originY = 150;
+  const scale = 6;
+  const p = (x: number, y: number) => `${originX + x * scale},${originY - y * scale}`;
   return (
     <div className="svg-center svg-center--tight">
-      <svg
-        viewBox="0 0 300 215"
-        width="320"
-        height="230"
-        role="img"
-        aria-label="מערכת צירים ובה משולשים דומים DOC ו־AOB"
-        shapeRendering="geometricPrecision"
-      >
-        {Array.from({ length: 12 }).map((_, index) => (
-          <line key={`v-${index}`} x1={originX + index * scale} y1="20" x2={originX + index * scale} y2={originY} stroke="#e2e2e2" strokeWidth="0.5" />
-        ))}
-        {Array.from({ length: 17 }).map((_, index) => (
-          <line key={`h-${index}`} x1={originX} y1={originY - index * scale} x2="270" y2={originY - index * scale} stroke="#e2e2e2" strokeWidth="0.5" />
-        ))}
-        <line x1="30" y1={originY} x2="280" y2={originY} stroke="#172554" strokeWidth="1.5" />
-        <line x1={originX} y1="12" x2={originX} y2="202" stroke="#172554" strokeWidth="1.5" />
-        <polygon points={`${originX},${originY} ${originX + 4 * scale},${originY} ${originX},${originY - 6 * scale}`} fill="#eef2ff" stroke="#1e40af" strokeWidth="1.6" />
-        <polygon points={`${originX},${originY} ${originX + 10 * scale},${originY} ${originX},${originY - 15 * scale}`} fill="none" stroke="#172554" strokeWidth="2" />
-        <text x={originX - 12} y={originY + 16}>O</text>
-        <text x={originX + 4 * scale} y={originY + 16} direction="ltr">C(4,0)</text>
-        <text x={originX - 45} y={originY - 6 * scale} direction="ltr">D(0,6)</text>
-        <text x={originX + 10 * scale} y={originY + 16} direction="ltr">A(10,0)</text>
-        <text x={originX - 50} y={originY - 15 * scale} direction="ltr">B(0,15)</text>
+      <svg viewBox="0 0 300 285" width="320" height="300" role="img" aria-label="מערכת צירים ובה המשולשים הדומים DOC ו־AOB; A(0,20), D(-5,0), C(0,-3), B(12,0)" shapeRendering="geometricPrecision">
+        <line x1="20" y1={originY} x2="285" y2={originY} stroke="#172554" strokeWidth="1.5" />
+        <line x1={originX} y1="15" x2={originX} y2="270" stroke="#172554" strokeWidth="1.5" />
+        <polygon points={`${p(0,0)} ${p(-5,0)} ${p(0,-3)}`} fill="#eef2ff" stroke="#1e40af" strokeWidth="1.8" />
+        <polygon points={`${p(0,0)} ${p(0,20)} ${p(12,0)}`} fill="none" stroke="#172554" strokeWidth="2" />
+        <text x={originX - 12} y={originY - 7}>O</text>
+        <text x={originX - 5 * scale - 42} y={originY + 5} direction="ltr">D(-5,0)</text>
+        <text x={originX - 42} y={originY + 3 * scale + 18} direction="ltr">C(0,-3)</text>
+        <text x={originX - 48} y={originY - 20 * scale - 6} direction="ltr">A(0,20)</text>
+        <text x={originX + 12 * scale + 8} y={originY + 5} direction="ltr">B(12,0)</text>
       </svg>
     </div>
   );
@@ -75,15 +63,15 @@ export function RatioPage42() {
       <QSep />
 
       <Question>
-        <p>במערכת הצירים מסורטטים שני משולשים ישרי־זווית דומים: △DOC ∼ △AOB. הנקודות הן O(0,0),‏ D(0,6),‏ C(4,0),‏ A(10,0).</p>
+        <p>במערכת הצירים מסורטטים שני משולשים ישרי־זווית דומים: △DOC ∼ △AOB. הנקודות הנתונות הן A(0,20),‏ D(-5,0),‏ C(0,-3),‏ O(0,0).</p>
         <CoordinateTriangles />
         <SubQuestion label="א.">
           <p>מהו יחס הדמיון בין △DOC ל־△AOB?</p>
           <MultipleChoice options={[
-            { value: '1 : 4' },
-            { value: '2 : 5' },
-            { value: '3 : 5' },
+            { value: '1 : 12' },
             { value: '3 : 20' },
+            { value: '1 : 4' },
+            { value: '3 : 5' },
           ]} />
         </SubQuestion>
         <SubQuestion label="ב.">

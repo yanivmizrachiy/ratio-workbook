@@ -184,7 +184,7 @@ describe('ratio workbook structure', () => {
     expect(markup).toContain('ordered-pair-comma');
     expect(markup).toContain('calculation-response');
     expect(count(markup, /class="work-area-space"/g)).toBeGreaterThanOrEqual(1);
-    for (const value of ['C(4,0)', 'D(0,6)', 'A(10,0)', 'B(0,15)']) {
+    for (const value of ['D(-5,0)', 'C(0,-3)', 'A(0,20)', 'B(12,0)']) {
       expect(markup).toMatch(new RegExp(`<text[^>]*direction="ltr"[^>]*>${value.replace(/[()]/g, '\\$&')}</text>`));
     }
   });
@@ -200,4 +200,24 @@ describe('ratio workbook structure', () => {
       expect(markup).toMatch(new RegExp(`<text[^>]*direction="ltr"[^>]*>${value}</text>`));
     }
   });
+
+  it('locks the 2026-10-04 deep mathematical audit corrections', () => {
+    expect(renderKey('ratio-page-11')).toContain('חלקם נעלו נעלי ספורט והיתר נעלו סנדלים');
+    expect(renderKey('curriculum-page-02')).toContain('כמה כדורים קיבלה כל קבוצה?');
+    expect(renderKey('ch4-page-02')).toContain('שיעור הטיפות הכחולות מתוך כלל הטיפות גדול יותר');
+    expect(renderKey('ch4-page-03')).toContain('ק&quot;מ/ליטר');
+    expect(renderKey('ch6-page-01')).toContain('b ≠ 0');
+    expect(renderKey('ch6-page-03')).toContain('x = מספר כוסות הקמח');
+    expect(renderKey('ch2-page-10')).toContain('מספרים <strong>חיוביים</strong>');
+    expect(renderKey('ch1-page-08')).toContain('1 : 2  =  <span class="inline-blank"></span> : 6');
+    expect(renderKey('ratio-page-23')).toContain('אחת מ־12 המשבצות הלבנות');
+    expect(renderKey('ch7-page-08')).toContain('הוא 2 : 1');
+    expect(renderKey('ch7-page-08')).toContain('<span class="fraction"><span class="frac-num">2</span><span class="frac-line"></span><span class="frac-den">3</span></span>');
+    expect(renderKey('ch7-page-07')).toContain('א׳ 16, ב׳ 24, ג׳ 20, ד׳ 30');
+    expect(renderKey('ch7-page-05')).toContain('160 ס&quot;מ');
+    expect(renderKey('ch7-page-05')).toContain('240 ס&quot;מ');
+    expect(renderKey('ratio-page-42')).toContain('A(0,20)');
+    expect(renderKey('ratio-page-42')).toContain('B(12,0)');
+  });
+
 });

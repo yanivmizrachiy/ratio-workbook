@@ -8,7 +8,7 @@ export function Ch6Page1() {
   return (
     <PageLayout pageNumber={30} chapter={CH} topic={TOPIC}>
       <div className="info-box">
-        <p><strong>פרופורציה</strong> היא <strong>שוויון בין שני יחסים</strong>. כדי לבדוק אם מתקיימת פרופורציה בין <Frac num="a" den="b" /> לבין <Frac num="c" den="d" /> בודקים אם <strong>a · d = b · c</strong> .</p>
+        <p><strong>פרופורציה</strong> היא <strong>שוויון בין שני יחסים</strong>. כדי לבדוק אם מתקיימת פרופורציה בין <Frac num="a" den="b" /> לבין <Frac num="c" den="d" /> כאשר <strong>b ≠ 0</strong> ו־<strong>d ≠ 0</strong>, בודקים אם <strong>a · d = b · c</strong> .</p>
       </div>
 
       <Question>
@@ -127,7 +127,7 @@ export function Ch6Page3() {
         <p>להכנת לביבות מערבבים <strong>כוס קמח אחת</strong> עם <strong>2 גביעי יוגורט</strong>.</p>
         <SubQuestion label="א."><p>מהו היחס בין מספר כוסות הקמח למספר גביעי היוגורט? <Blank /></p></SubQuestion>
         <SubQuestion label="ב."><p>מכינים בלילה מ - 4 כוסות קמח. כמה גביעי יוגורט דרושים?</p></SubQuestion>
-        <SubQuestion label="ג."><p>מהו הייצוג האלגברי של הישר המתאר את היחס בין מספר כוסות הקמח למספר גביעי היוגורט?</p></SubQuestion>
+        <SubQuestion label="ג."><p>נסמן x = מספר כוסות הקמח ו־y = מספר גביעי היוגורט. מהו הייצוג האלגברי של הישר?</p></SubQuestion>
       </Question>
 
       <QSep />
