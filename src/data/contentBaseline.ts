@@ -56,4 +56,4 @@ export const PRE_REORDER_PAGE_MARKUP_SHA256: Readonly<Record<string, string>> = 
   "curriculum-page-07": "11371dc0a9631b56fcfbccb4ad3882df41a3f03597eb02af1f1be0a03ae10c1a"
 };
 
-export const PRE_REORDER_WORKBOOK_SHA256 = "b59a76b02433d98aa0774d6ae2c7ee22f6f13f00e530de5f32d1ed75ac5eac42";
+export const PRE_REORDER_WORKBOOK_SHA256 = "3c197463a311b6339530025c61eae70b0f63d86db5e300a03101d6ceabdc37b9";
