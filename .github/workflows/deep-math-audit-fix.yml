@@ -32,7 +32,7 @@ jobs:
           python-version: '3.11'
       - run: npm ci
       - name: Apply deterministic mathematical corrections
-        run: python scripts/apply-deep-math-audit-fixes.py
+        run: python scripts/run-deep-math-audit-fixes.py
       - name: Regenerate locked content baseline from corrected source
         run: node scripts/regenerate-content-baseline.mjs
       - name: Install Chromium
@@ -45,7 +45,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add SOURCE_OF_TRUTH.md src scripts/apply-deep-math-audit-fixes.py scripts/regenerate-content-baseline.mjs
+          git add SOURCE_OF_TRUTH.md src scripts/apply-deep-math-audit-fixes.py scripts/run-deep-math-audit-fixes.py scripts/regenerate-content-baseline.mjs
           if git diff --cached --quiet; then
             echo 'No source changes to commit.'
             exit 0
