@@ -128,9 +128,9 @@ function InscribedRectangleModel() {
         <rect x="40" y="205" width="10" height="10" fill="none" stroke="#172554" strokeWidth="1.2" />
         <text x="28" y="50">A</text><text x="27" y="230">B</text><text x="179" y="230">C</text>
         <text x="27" y="110">D</text><text x="88" y="103">F</text><text x="88" y="230">E</text>
-        <text x="22" y="140" transform="rotate(-90 22 140)" textAnchor="middle" direction="ltr">AB=18</text>
-        <text x="107" y="233" textAnchor="middle" direction="ltr">BC=15</text>
-        <text x="62" y="100" textAnchor="middle" direction="ltr">DF=5</text>
+        <text x="22" y="140" transform="rotate(-90 22 140)" textAnchor="middle" direction="ltr">18</text>
+        <text x="107" y="233" textAnchor="middle" direction="ltr">15</text>
+        <text x="62" y="100" textAnchor="middle" direction="ltr">5</text>
       </svg>
     </div>
   );
